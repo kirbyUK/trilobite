@@ -3,14 +3,14 @@
 #include <fstream>
 #include <cstdio>
 
-File::File(char* path)
+File::File(const char* path)
 {
 	//'path' should be the full file path,
 	//so we can open it for reading immediatly:
 	//We open it in binary mode as we do not want
 	//to parse the contents, simply read them and
 	//get the size:
-	ifstream in(path, std::ios::binary);
+	std::ifstream in(path, std::ios::binary);
 	
 	//However, if there is an issue reading the file,
 	//throw an error:
@@ -45,7 +45,7 @@ File* File::copy()
 bool File::paste(std::string newpath)
 {
 	//Read in the file to paste:
-	ifstream in(_name, std::ios::binary);
+	std::ifstream in(_name.c_str(), std::ios::binary);
 	
 	if(! in)
 		return false;
@@ -60,7 +60,7 @@ bool File::paste(std::string newpath)
 	in.close();
 
 	//Opens an output file:
-	ofstream out(newpath.c_str(), std::ios::binary);
+	std::ofstream out(newpath.c_str(), std::ios::binary);
 
 	if(! out)
 		return false;
@@ -72,7 +72,7 @@ bool File::paste(std::string newpath)
 
 	//If we are cutting the file, delete the original:
 	if(_isCut)
-		if(! deletef(_name))
+		if(! deletef())
 			return false;
 
 	return true;
@@ -87,11 +87,11 @@ bool File::deletef()
 	return true;
 }
 
-bool File::rename(std::string newname)
+bool File::rename(const char* newname)
 {
 	//Renames the file to 'newname', if it cannot, 
 	//returns false:
-	if(! rename(_file, newname))
+	if(! std::rename(_name.c_str(), newname))
 		return false;
 
 	return true;

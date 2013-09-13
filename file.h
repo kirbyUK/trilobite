@@ -26,7 +26,7 @@ class File
 		virtual File* copy();
 		virtual bool paste(std::string);
 		virtual bool deletef();
-		virtual bool rename(std::string);
+		virtual bool rename(const char*);
 
 		//Getters:
 		std::string getName();
