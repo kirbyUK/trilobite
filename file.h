@@ -14,7 +14,7 @@
 class File
 {
 	protected:
-		std::string _name;
+		std::string _path;
 		unsigned int _size;
 		bool _isCut;
 
@@ -22,13 +22,14 @@ class File
 		File(const char*);
 
 		//File operation functions:
-		virtual File* cut();
-		virtual File* copy();
-		virtual bool paste(std::string);
+		virtual std::string cut();
+		virtual std::string copy();
+		virtual bool paste(std::string, std::string);
 		virtual bool deletef();
 		virtual bool rename(const char*);
 
 		//Getters:
+		std::string getPath();
 		std::string getName();
 		unsigned int getSize();
 };

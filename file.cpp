@@ -1,6 +1,7 @@
 // --- file.cpp
 #include "file.h"
 #include <fstream>
+#include <iostream>
 #include <cstdio>
 
 File::File(const char* path)
@@ -26,47 +27,66 @@ File::File(const char* path)
 	in.close();
 
 	//Saves the filename:
-	_name = path;
+	_path = path;
 
 	_isCut = false;
 }
 
-File* File::cut()
+std::string File::cut()
 {
-	_isCut = true;
-	return this;
-}
-
-File* File::copy()
-{
-	return this;
-}
-
-bool File::paste(std::string newpath)
-{
-	//Read in the file to paste:
-	std::ifstream in(_name.c_str(), std::ios::binary);
-	
-	if(! in)
-		return false;
-
+	//Read in the file:
+	std::ifstream in(_path.c_str(), std::ios::binary);
+		
 	//The string the file will be read to:
 	std::string file = "";
 
-	//Reads the file:
-	while(in.good())
-		file += char(in.get());
+	if(! in)
+		return NULL;
+	else
+	{
+		_isCut = true;
 
-	in.close();
+		//Reads the file:
+		while(in.good())
+			file += char(in.get());
 
+		in.close();
+	}
+	return file; 
+}
+
+std::string File::copy()
+{
+	//Read in the file:
+	std::ifstream in(_path.c_str(), std::ios::binary);
+	
+	//The string the file will be read to:
+	std::string file = "";
+
+	if(! in)
+		return NULL;
+	else
+	{
+		//Reads the file:
+		while(in.good())
+			file += char(in.get());
+
+		in.close();
+	}
+	return file; 
+}
+
+bool File::paste(std::string buffer, std::string newpath)
+{
 	//Opens an output file:
-	std::ofstream out(newpath.c_str(), std::ios::binary);
+	std::string path = newpath + getName();
+	std::ofstream out(path.c_str(), std::ios::binary);
 
 	if(! out)
 		return false;
 
 	//Writes the file:
-	out << file;
+	out << buffer;
 
 	out.close();
 
@@ -81,7 +101,7 @@ bool File::paste(std::string newpath)
 bool File::deletef()
 {
 	//Removes the file, if it cannot, returns false:
-	if(! remove(_name.c_str()))
+	if(remove(_path.c_str()) != 0)
 		return false;
 
 	return true;
@@ -91,15 +111,25 @@ bool File::rename(const char* newname)
 {
 	//Renames the file to 'newname', if it cannot, 
 	//returns false:
-	if(! std::rename(_name.c_str(), newname))
+	if(! std::rename(_path.c_str(), newname))
 		return false;
 
 	return true;
 }
 
+std::string File::getPath()
+{
+	return _path;
+}
+
 std::string File::getName()
 {
-	return _name;
+	//Finds the position of the last '/':
+	int pos = _path.find_last_of('/');
+
+	//Returns the substring from that position
+	//to the end of the string, the filename:
+	return _path.substr(pos + 1);
 }
 
 unsigned int File::getSize()
