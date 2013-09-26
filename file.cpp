@@ -6,6 +6,15 @@
 
 File::File(const char* path)
 {
+	//Reads the file's attributes into '_attr':
+	_attr = new struct stat;
+	if(stat(path, _attr) != 0)
+		throw "I am error";
+
+	//Checks the passed file is not a directory:
+	if(S_ISDIR(_attr->st_mode) != 0)
+		throw "Is a directory!";
+
 	//'path' should be the full file path,
 	//so we can open it for reading immediatly:
 	//We open it in binary mode as we do not want
@@ -28,11 +37,6 @@ File::File(const char* path)
 
 	//Saves the filename:
 	_path = path;
-
-	//Reads the file's attributes into '_attr':
-	_attr = new struct stat;
-	if(stat(path, _attr) != 0)
-		throw "I am error";
 
 	_isCut = false;
 }
