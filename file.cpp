@@ -1,8 +1,8 @@
 // --- file.cpp
 #include "file.h"
 #include <fstream>
-#include <iostream>
 #include <cstdio>
+#include <sys/stat.h>
 
 File::File(const char* path)
 {
@@ -29,7 +29,18 @@ File::File(const char* path)
 	//Saves the filename:
 	_path = path;
 
+	//Reads the file's attributes into '_attr':
+	_attr = new struct stat;
+	if(stat(path, _attr) != 0)
+		throw "I am error";
+
 	_isCut = false;
+}
+
+File::~File()
+{
+	//Deletes the stat struct:
+	delete _attr;
 }
 
 std::string File::cut()
@@ -94,6 +105,13 @@ bool File::paste(std::string buffer, std::string newpath)
 	if(_isCut)
 		if(! deletef())
 			return false;
+
+	//Get the original's permission bits:
+	mode_t permission = _attr->st_mode;
+
+	//Attempts to write the original permission bits:
+	if(chmod(path.c_str(), permission) != 0)
+		return false;
 
 	return true;
 }

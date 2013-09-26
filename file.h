@@ -10,16 +10,19 @@
 #ifndef FILE_H
 #define FILE_H
 #include <string>
+#include <sys/stat.h>
 
 class File
 {
 	protected:
 		std::string _path;
 		unsigned int _size;
+		struct stat* _attr;
 		bool _isCut;
 
 	public:
 		File(const char*);
+		virtual ~File();
 
 		//File operation functions:
 		virtual std::string cut();
