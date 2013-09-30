@@ -25,9 +25,8 @@ class File
 		virtual ~File();
 
 		//File operation functions:
-		virtual std::string cut();
-		virtual std::string copy();
-		virtual bool paste(std::string, std::string);
+		virtual void cut();
+		virtual bool paste(std::string);
 		virtual bool deletef();
 		virtual bool rename(const char*);
 

@@ -47,62 +47,29 @@ File::~File()
 	delete _attr;
 }
 
-std::string File::cut()
+void File::cut()
 {
-	//Read in the file:
-	std::ifstream in(_path.c_str(), std::ios::binary);
-		
-	//The string the file will be read to:
-	std::string file = "";
-
-	if(! in)
-		return NULL;
-	else
-	{
-		_isCut = true;
-
-		//Reads the file:
-		while(in.good())
-			file += char(in.get());
-
-		in.close();
-	}
-	return file; 
+	_isCut = true;
 }
 
-std::string File::copy()
+bool File::paste(std::string newpath)
 {
-	//Read in the file:
+	//Opens an input file:
 	std::ifstream in(_path.c_str(), std::ios::binary);
-	
-	//The string the file will be read to:
-	std::string file = "";
 
-	if(! in)
-		return NULL;
-	else
-	{
-		//Reads the file:
-		while(in.good())
-			file += char(in.get());
-
-		in.close();
-	}
-	return file; 
-}
-
-bool File::paste(std::string buffer, std::string newpath)
-{
 	//Opens an output file:
 	std::string path = newpath + getName();
 	std::ofstream out(path.c_str(), std::ios::binary);
 
-	if(! out)
+	//If either cannot be opened:
+	if((! in) || (! out))
 		return false;
 
 	//Writes the file:
-	out << buffer;
+	out << in.rdbuf();
 
+	//Closes the files:
+	in.close();
 	out.close();
 
 	//If we are cutting the file, delete the original:
