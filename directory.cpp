@@ -91,6 +91,9 @@ Directory::~Directory()
 	//associated with the directory:
 	for(unsigned int i = 0; i < _files.size(); i++)
 		delete _files[i];
+
+	//Deletes the directory attributes:
+	delete _attr;
 }
 
 bool Directory::paste(std::string newpath)
