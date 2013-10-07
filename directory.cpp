@@ -1,4 +1,5 @@
 #include "directory.h"
+#include "file.h"
 #include <dirent.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -15,6 +16,11 @@ Directory::Directory(const char* path)
 	if(S_ISDIR(_attr->st_mode) == 0)
 		throw "Is a not directory!";
 
+	//Sets the directory path, adds a '/' if there is not one:
+	_path = path;
+	if(_path[_path.size()] != '/')
+		_path += '/';
+
 	//Creates a pointer to a 'DIR' struct:
 	DIR* dir = opendir(path);
 	if(dir == NULL)
@@ -27,24 +33,21 @@ Directory::Directory(const char* path)
 	while(dir_contents != 0)
 	{
 		//The full path of the file:
-		std::string filepath = path + dir_contents -> d_name;
+		std::string filepath = _path + dir_contents->d_name;
 
-		File* file = NULL;
+		DiskItem* file = NULL;
 
 		//Checks if the path is a directory or a file:
 		struct stat* attr = new struct stat;
-		if(stat(filepath, attr) != 0)
+		if(stat(filepath.c_str(), attr) != 0)
 			throw "I am error";
 		
 		if(S_ISDIR(attr->st_mode) == 0)
 		{
-			//Appends a '/' to the filepath:
-			filepath += '/';
-
 			//Attempt to open the directory:
 			try
 			{
-				file = new Directory(filepath);	
+				file = new Directory(filepath.c_str());	
 			}
 			catch(const char* e)
 			{
@@ -73,10 +76,13 @@ Directory::Directory(const char* path)
 		dir_contents = readdir(dir);
 	}
 
+	_size = 0;
 	//Gets the size of the directory by adding the size of
 	//the contents together:
 	for(unsigned int i = 0; i < _files.size(); i++)
 		_size += _files[i]->getSize();	
+
+	_isCut = false;
 }
 
 Directory::~Directory()
@@ -90,7 +96,7 @@ Directory::~Directory()
 bool Directory::paste(std::string newpath)
 {
 	//Creates a new directory in the new path:
-	path = newpath + getName();
+	std::string path = newpath + getName();
 	if(mkdir(newpath.c_str(), _attr->st_mode) != 0)
 		return false;
 
@@ -117,13 +123,24 @@ bool Directory::deletef()
 		if(! _files[i]->deletef())
 			return false;
 
-	if(rmdir(_path) != 0)
+	if(rmdir(_path.c_str()) != 0)
 		return false;
 
 	return true; 
 }
 
-std::vector <File*>& Directory::getFiles()
+std::string Directory::getName()
+{
+	//Gets the position of the second to last '/', as
+	//we know the very last character will be '/':
+	int pos = _path.find_last_of('/', (_path.size() - 1));
+
+	//Returns the substring from that position to the end
+	//of the string, the directory name:
+	return _path.substr(pos + 1);
+}
+
+std::vector <DiskItem*>& Directory::getFiles()
 {
 	return _files;
 }

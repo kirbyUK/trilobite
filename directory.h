@@ -1,16 +1,16 @@
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
-#include "file.h"
+#include "diskItem.h"
 #include <vector>
 
-class Directory : public File
+class Directory : public DiskItem
 {
 	private:
 		//The files the directory contains:
-		std::vector <File*> _files;
+		std::vector <DiskItem*> _files;
 
 	public:
-		//Constructor:
+		//Constructor: 
 		Directory(const char*);
 
 		//Destructor:
@@ -20,8 +20,9 @@ class Directory : public File
 		bool paste(std::string);
 		bool deletef();
 
-		//Returns the list of files:
-		std::vector <File*>& getFiles();
+		//Getters:
+		std::string getName();
+		std::vector <DiskItem*>& getFiles();
 };
 
 #endif

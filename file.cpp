@@ -47,11 +47,6 @@ File::~File()
 	delete _attr;
 }
 
-void File::cut()
-{
-	_isCut = true;
-}
-
 bool File::paste(std::string newpath)
 {
 	//Opens an input file:
@@ -96,21 +91,6 @@ bool File::deletef()
 	return true;
 }
 
-bool File::rename(const char* newname)
-{
-	//Renames the file to 'newname', if it cannot, 
-	//returns false:
-	if(! std::rename(_path.c_str(), newname))
-		return false;
-
-	return true;
-}
-
-std::string File::getPath()
-{
-	return _path;
-}
-
 std::string File::getName()
 {
 	//Finds the position of the last '/':
@@ -119,9 +99,4 @@ std::string File::getName()
 	//Returns the substring from that position
 	//to the end of the string, the filename:
 	return _path.substr(pos + 1);
-}
-
-unsigned int File::getSize()
-{
-	return _size;
 }

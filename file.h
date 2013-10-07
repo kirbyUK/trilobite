@@ -9,26 +9,19 @@
 // ---
 #ifndef FILE_H
 #define FILE_H
+#include "diskItem.h"
 #include <string>
 #include <sys/stat.h>
 
-class File
+class File : public DiskItem
 {
-	protected:
-		std::string _path;
-		unsigned int _size;
-		struct stat* _attr;
-		bool _isCut;
-
 	public:
 		File(const char*);
-		virtual ~File();
+		~File();
 
 		//File operation functions:
-		virtual void cut();
-		virtual bool paste(std::string);
-		virtual bool deletef();
-		virtual bool rename(const char*);
+		bool paste(std::string);
+		bool deletef();
 
 		//Getters:
 		std::string getPath();
