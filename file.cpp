@@ -16,7 +16,7 @@ File::File(const char* path)
 		throw "Is a directory!";
 
 	//'path' should be the full file path,
-	//so we can open it for reading immediatly:
+	//so we can open it for reading immediately:
 	//We open it in binary mode as we do not want
 	//to parse the contents, simply read them and
 	//get the size:

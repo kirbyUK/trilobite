@@ -1,3 +1,10 @@
+// ---
+// directory.h
+//
+// Contains the class definition for
+// a directory, a collection of DiskItems.
+// ---
+
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
 #include "diskItem.h"

@@ -1,7 +1,7 @@
 // ---
 // file.h
 //
-// Contains the class defintion for
+// Contains the class definition for
 // a file, which will contain all
 // the relevant data needed on the
 // file, and methods to allow the

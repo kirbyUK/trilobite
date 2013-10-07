@@ -16,7 +16,6 @@ bool DiskItem::rename(const char* newname)
 	return true;
 }
 
-
 std::string DiskItem::getPath()
 {
 	return _path;
