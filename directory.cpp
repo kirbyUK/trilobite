@@ -1,5 +1,6 @@
 #include "directory.h"
 #include "file.h"
+#include <fstream>
 #include <dirent.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -18,7 +19,7 @@ Directory::Directory(const char* path)
 
 	//Sets the directory path, adds a '/' if there is not one:
 	_path = path;
-	if(_path[_path.size()] != '/')
+	if(_path[_path.size() - 1] != '/')
 		_path += '/';
 
 	//Creates a pointer to a 'DIR' struct:
@@ -32,8 +33,18 @@ Directory::Directory(const char* path)
 	//While there is stuff to read:
 	while(dir_contents != 0)
 	{
+		std::string name = dir_contents->d_name;
+
+		//Checks we are not reading ".":
+		if((name == ".") || (name == ".."))
+		{
+			//Read the next entry:
+			dir_contents = readdir(dir);
+			continue;
+		}
+
 		//The full path of the file:
-		std::string filepath = _path + dir_contents->d_name;
+		std::string filepath = _path + name;
 
 		DiskItem* file = NULL;
 
@@ -42,7 +53,7 @@ Directory::Directory(const char* path)
 		if(stat(filepath.c_str(), attr) != 0)
 			throw "I am error";
 		
-		if(S_ISDIR(attr->st_mode) == 0)
+		if(S_ISDIR(attr->st_mode) != 0)
 		{
 			//Attempt to open the directory:
 			try
@@ -76,7 +87,8 @@ Directory::Directory(const char* path)
 		dir_contents = readdir(dir);
 	}
 
-	_size = 0;
+	_size = _attr->st_size;
+
 	//Gets the size of the directory by adding the size of
 	//the contents together:
 	for(unsigned int i = 0; i < _files.size(); i++)

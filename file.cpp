@@ -27,13 +27,8 @@ File::File(const char* path)
 	if(! in)
 		throw "I am error";
 
-	//Get the filesize by going to the end of the file,
-	//and storing the position:
-	in.seekg(0, std::ifstream::end);
-	_size = in.tellg();
-
-	//Closes the file:
-	in.close();
+	//Gets the size:
+	_size = _attr->st_size;
 
 	//Saves the filename:
 	_path = path;
