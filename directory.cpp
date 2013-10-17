@@ -1,5 +1,4 @@
 #include "directory.h"
-#include <iostream>
 #include "file.h"
 #include <fstream>
 #include <dirent.h>
