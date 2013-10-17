@@ -1,4 +1,5 @@
 #include "directory.h"
+#include <iostream>
 #include "file.h"
 #include <fstream>
 #include <dirent.h>
@@ -148,7 +149,7 @@ std::string Directory::getName()
 {
 	//Gets the position of the second to last '/', as
 	//we know the very last character will be '/':
-	int pos = _path.find_last_of('/', (_path.size() - 1));
+	int pos = _path.find_last_of('/', (_path.size() - 2));
 
 	//Returns the substring from that position to the end
 	//of the string, the directory name:
