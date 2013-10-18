@@ -35,4 +35,13 @@ class DiskItem
 		unsigned int getSize();
 };
 
+//Checks the names of the two items passed,
+//returns true if they are in order, or false
+//if they are not. Used with the 'sort' function
+//from the standard 'algorithm' library:
+bool byName(DiskItem*, DiskItem*);
+
+//Takes a string an returns the lowercase variant:
+std::string lowercase(std::string);
+
 #endif
