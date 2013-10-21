@@ -1,5 +1,6 @@
 #include "diskItem.h"
 #include <cstdio>
+#include <cctype>
 
 void DiskItem::cut()
 {
