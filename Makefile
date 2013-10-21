@@ -4,7 +4,7 @@ LIBS=-lncurses
 SDIR=./
 
 trilobite: trilobite.o file.o directory.o diskItem.o
-	$(CC) $(LIBS) file.o directory.o diskItem.o -o trilobite
+	$(CC) $(LIBS) trilobite.o file.o directory.o diskItem.o -o trilobite
 
 trilobite.o: $(SDIR)trilobite.cpp
 	$(CC) $(FLAGS) trilobite.cpp 
