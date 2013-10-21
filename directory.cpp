@@ -112,7 +112,7 @@ bool Directory::paste(std::string newpath)
 {
 	//Creates a new directory in the new path:
 	std::string path = newpath + getName();
-	if(mkdir(newpath.c_str(), _attr->st_mode) != 0)
+	if(mkdir(path.c_str(), _attr->st_mode) != 0)
 		return false;
 
 	//Copies the contents of the directory to
