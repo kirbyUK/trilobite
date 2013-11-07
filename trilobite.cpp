@@ -59,8 +59,12 @@ int main()
 {
 	//Initialise ncurses:
 	initscr();
+
 	start_color();
 	refresh();
+
+	//Hides the cursor:
+	curs_set(0);
 
 	updateWindows();
 	drawHelp();
