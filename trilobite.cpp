@@ -39,12 +39,12 @@ void updateWindows()
 	fileinfo.x = fileview.width + 1;
 	fileinfo.y = 1;
 	fileinfo.width = (screenX - fileview.width) - 1;
-	fileinfo.height = (screenY - 2) * 0.75;
+	fileinfo.height = ((screenY - 2) * 0.75) - 1;
 
 	extrainfo.x = fileinfo.x;
-	extrainfo.y = (fileinfo.y + fileinfo.height) + 1;
-	extrainfo.width = fileinfo.height;
-	extrainfo.height = screenY - fileinfo.height;
+	extrainfo.y = fileinfo.y + fileinfo.height;
+	extrainfo.width = fileinfo.width;
+	extrainfo.height = (screenY - fileinfo.height) - 2;
 
 	fileview.window = newwin(fileview.height, fileview.width, fileview.y, fileview.x);
 	fileinfo.window = newwin(fileinfo.height, fileinfo.width, fileinfo.y, fileinfo.x);
