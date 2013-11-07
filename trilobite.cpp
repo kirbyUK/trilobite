@@ -1,8 +1,14 @@
 #include "diskItem.h"
 #include "directory.h"
 #include "file.h"
+
 #include <ncurses.h> 
+#include <iostream>
 #include <string>
+#include <cerrno>
+
+void updateWindows();
+void drawHelp();
 
 struct windows
 {
@@ -16,13 +22,49 @@ const std::string HELP_TEXT = "Z: Paste X: Cut C: Copy R: Rename D: Delete ?: He
 //The height and width of the window:
 int screenX = 0, screenY = 0;
 
-//Draws the help text:
-void drawHelp()
+int main(int argc, char* argv[])
 {
-	init_pair(1, COLOR_WHITE, COLOR_BLUE);
-	attron(COLOR_PAIR(1));
-	mvprintw((screenY - 1), 0, "%s", HELP_TEXT.c_str());
-	attroff(COLOR_PAIR(1));
+	//The current working directory:
+	Directory* currentDir = NULL;
+
+	//Checks if too many arguments have been given:
+	if(argc > 2)
+	{
+		std::cerr << "Please specify a directory.\n";
+		return -1;
+	}
+	//Otherwise, sees if a directory has been given,
+	//and if so, attempt to open it:
+	else if(argc == 2)
+	{
+		//Attempt to open 
+	//	try
+	//	{
+	//		currentDir = new Directory(argv[1]);
+	//	}
+	}
+
+	//Initialise ncurses:
+	initscr();
+
+	start_color();
+	refresh();
+
+	//Hides the cursor:
+	curs_set(0);
+
+	updateWindows();
+	drawHelp();
+	refresh();
+	wrefresh(fileview.window);
+	wrefresh(fileinfo.window);
+	wrefresh(extrainfo.window);
+
+	getch();
+
+	//Close ncurses:
+	endwin();
+	return 0;
 }
 
 //Updates the window size:
@@ -55,27 +97,11 @@ void updateWindows()
 	wborder(extrainfo.window, '|', '|', '-', '-', '+', '+', '+', '+');
 }
 
-int main()
+//Draws the help text:
+void drawHelp()
 {
-	//Initialise ncurses:
-	initscr();
-
-	start_color();
-	refresh();
-
-	//Hides the cursor:
-	curs_set(0);
-
-	updateWindows();
-	drawHelp();
-	refresh();
-	wrefresh(fileview.window);
-	wrefresh(fileinfo.window);
-	wrefresh(extrainfo.window);
-
-	getch();
-
-	//Close ncurses:
-	endwin();
-	return 0;
+	init_pair(1, COLOR_WHITE, COLOR_BLUE);
+	attron(COLOR_PAIR(1));
+	mvprintw((screenY - 1), 0, "%s", HELP_TEXT.c_str());
+	attroff(COLOR_PAIR(1));
 }
