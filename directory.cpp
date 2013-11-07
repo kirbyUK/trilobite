@@ -1,5 +1,6 @@
 #include "directory.h"
 #include "file.h"
+#include <cerrno>
 #include <fstream>
 #include <dirent.h>
 #include <sys/types.h>
@@ -11,11 +12,11 @@ Directory::Directory(const char* path)
 	//Reads the directory's attributes into '_attr':
 	_attr = new struct stat;
 	if(stat(path, _attr) != 0)
-		throw "I am error";
+		throw errno;
 
 	//Checks the passed file is a directory:
 	if(S_ISDIR(_attr->st_mode) == 0)
-		throw "Is a not directory!";
+		throw errno;
 
 	//Sets the directory path, adds a '/' if there is not one:
 	_path = path;
@@ -25,7 +26,7 @@ Directory::Directory(const char* path)
 	//Creates a pointer to a 'DIR' struct:
 	DIR* dir = opendir(path);
 	if(dir == NULL)
-		throw "I am error";
+		throw errno;
 
 	//Creates a pointer to a 'dirent' struct:
 	dirent* dir_contents = readdir(dir);
@@ -51,7 +52,7 @@ Directory::Directory(const char* path)
 		//Checks if the path is a directory or a file:
 		struct stat* attr = new struct stat;
 		if(stat(filepath.c_str(), attr) != 0)
-			throw "I am error";
+			throw errno;
 		
 		if(S_ISDIR(attr->st_mode) != 0)
 		{
@@ -60,9 +61,9 @@ Directory::Directory(const char* path)
 			{
 				file = new Directory(filepath.c_str());	
 			}
-			catch(const char* e)
+			catch(int errno)
 			{
-				throw e;
+				throw errno;
 			}
 		}
 		else
@@ -72,9 +73,9 @@ Directory::Directory(const char* path)
 			{
 				file = new File(filepath.c_str());
 			}
-			catch(const char* e)
+			catch(in errno)
 			{
-				throw e;
+				throw errno;
 			}
 		}
 		//Delete the 'struct stat':
