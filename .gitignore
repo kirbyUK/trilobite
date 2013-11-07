@@ -11,3 +11,9 @@
 *.lai
 *.la
 *.a
+
+# The binary
+trilobite
+
+# Vim swap files:
+*.swp
