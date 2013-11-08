@@ -73,7 +73,7 @@ Directory::Directory(const char* path)
 			{
 				file = new File(filepath.c_str());
 			}
-			catch(in errno)
+			catch(int errno)
 			{
 				throw errno;
 			}

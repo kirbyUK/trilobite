@@ -38,10 +38,21 @@ int main(int argc, char* argv[])
 	else if(argc == 2)
 	{
 		//Attempt to open 
-	//	try
-	//	{
-	//		currentDir = new Directory(argv[1]);
-	//	}
+		try
+		{
+			currentDir = new Directory(argv[1]);
+		}
+		catch(int errno)
+		{
+			std::cerr << "Cannot open " << argv[1] << ": ";
+			switch(errno)
+			{
+				case EACCES:  std::cerr << "Permission denied.\n"; break;
+				case ENOTDIR: std::cerr << "Not a directory.\n"; break;
+				default: std::cerr << "lol\n";
+			}
+			return -1;
+		}
 	}
 
 	//Initialise ncurses:

@@ -2,6 +2,7 @@
 #include "file.h"
 #include <fstream>
 #include <cstdio>
+#include <cerrno>
 #include <sys/stat.h>
 
 File::File(const char* path)
@@ -9,11 +10,11 @@ File::File(const char* path)
 	//Reads the file's attributes into '_attr':
 	_attr = new struct stat;
 	if(stat(path, _attr) != 0)
-		throw "I am error";
+		throw errno;
 
 	//Checks the passed file is not a directory:
 	if(S_ISDIR(_attr->st_mode) != 0)
-		throw "Is a directory!";
+		throw errno;
 
 	//'path' should be the full file path,
 	//so we can open it for reading immediately:
@@ -25,7 +26,7 @@ File::File(const char* path)
 	//However, if there is an issue reading the file,
 	//throw an error:
 	if(! in)
-		throw "I am error";
+		throw errno;
 
 	//Gets the size:
 	_size = _attr->st_size;
