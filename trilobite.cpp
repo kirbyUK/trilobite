@@ -54,6 +54,27 @@ int main(int argc, char* argv[])
 			return -1;
 		}
 	}
+	//Otherwise, there are no arguments given, so use
+	//the user's current working directory:
+	else
+	{
+		try
+		{
+			char* cwd = get_current_dir_name();
+			currentDir = new Directory(cwd);
+		}
+		catch(int e)
+		{
+			std::cerr << "Cannot open '" << argv[1] << "': ";
+			switch(errno)
+			{
+				case EACCES:  std::cerr << "Permission denied.\n"; break;
+				case ENOENT:  std::cerr << "No such directory.\n"; break;
+				case ENOTDIR: std::cerr << "Not a directory.\n"; break;
+			}
+			return -1;
+		}
+	}
 
 	//Initialise ncurses:
 	initscr();
