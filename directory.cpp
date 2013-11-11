@@ -16,7 +16,10 @@ Directory::Directory(const char* path)
 
 	//Checks the passed file is a directory:
 	if(S_ISDIR(_attr->st_mode) == 0)
+	{
+		errno = ENOTDIR;
 		throw errno;
+	}
 
 	//Sets the directory path, adds a '/' if there is not one:
 	_path = path;
