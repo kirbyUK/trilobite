@@ -17,7 +17,7 @@ struct windows
 } fileview, fileinfo, extrainfo;
 
 //The help text at the bottom:
-const std::string HELP_TEXT = "Z: Paste X: Cut C: Copy R: Rename D: Delete ?: Help";
+const std::string HELP_TEXT = " X: Cut C: Copy V: Paste R: Rename D: Delete ?: Help";
 
 //The height and width of the window:
 int screenX = 0, screenY = 0;
