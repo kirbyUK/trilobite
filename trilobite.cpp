@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <cerrno>
+#include <unistd.h>
 
 void updateWindows();
 void drawHelp();
