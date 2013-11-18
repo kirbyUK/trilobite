@@ -10,6 +10,7 @@
 
 void updateWindows();
 void drawHelp();
+std::string fitToSize(std::string path, unsigned int size);
 
 struct windows
 {
@@ -21,7 +22,7 @@ struct windows
 const std::string HELP_TEXT = " X: Cut C: Copy V: Paste R: Rename D: Delete ?: Help";
 
 //The height and width of the window:
-int screenX = 0, screenY = 0;
+unsigned int screenX = 0, screenY = 0;
 
 int main(int argc, char* argv[])
 {
@@ -89,10 +90,17 @@ int main(int argc, char* argv[])
 	updateWindows();
 	drawHelp();
 
+	//If nessecary, resizes the directory path:
+	std::string path = "";
+	if(currentDir->getPath().length() >= screenX)
+		path = fitToSize(currentDir->getPath(), (screenX - 2));
+	else
+		path = currentDir->getPath();
+
 	//The X position needed to print the path in the centre:
-	int pos = ((screenX - currentDir->getPath().length()) / 2);
+	int pos = ((screenX - path.length()) / 2);
 	//Write the user's current directory:
-	mvprintw(0, pos, "%s", currentDir->getPath().c_str());
+	mvprintw(0, pos, "%s", path.c_str());
 
 	refresh();
 	wrefresh(fileview.window);
@@ -143,4 +151,28 @@ void drawHelp()
 	attron(COLOR_PAIR(1));
 	mvprintw((screenY - 1), 0, "%s", HELP_TEXT.c_str());
 	attroff(COLOR_PAIR(1));
+}
+
+//Takes a directory path and returns it shrunk to the given size or smaller:
+std::string fitToSize(std::string path, unsigned int size)
+{
+	//The position in the string, starts at 1 to skip the first '/':
+	int pos = 1;
+	while(path.length() > size)
+	{
+		//Gets the directory name between the '/':
+		int newPos = path.find('/', pos);
+		std::string dir = path.substr(pos, (newPos - pos));
+
+		//Replace the directory name with the first letter:
+		dir = dir[0];
+
+		//Grabs the bit of the path before and after the edit to build the string:
+		std::string front = path.substr(0, pos);
+		std::string back = path.substr(newPos, (path.size() - newPos));
+		path = (front + dir + back);
+
+		pos = newPos;
+	}
+	return path;
 }
