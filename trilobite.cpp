@@ -88,6 +88,12 @@ int main(int argc, char* argv[])
 
 	updateWindows();
 	drawHelp();
+
+	//The X position needed to print the path in the centre:
+	int pos = ((screenX - currentDir->getPath().length()) / 2);
+	//Write the user's current directory:
+	mvprintw(0, pos, "%s", currentDir->getPath().c_str());
+
 	refresh();
 	wrefresh(fileview.window);
 	wrefresh(fileinfo.window);
