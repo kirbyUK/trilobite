@@ -97,6 +97,7 @@ int main(int argc, char* argv[])
 	else
 		path = currentDir->getPath();
 
+
 	//The X position needed to print the path in the centre:
 	int pos = ((screenX - path.length()) / 2);
 	//Write the user's current directory:
@@ -164,6 +165,9 @@ std::string fitToSize(std::string path, unsigned int size)
 		int newPos = path.find('/', pos);
 		std::string dir = path.substr(pos, (newPos - pos));
 
+		//The characters removed, minus 1 for the '/':
+		int removed = dir.length() - 2;
+
 		//Replace the directory name with the first letter:
 		dir = dir[0];
 
@@ -172,7 +176,7 @@ std::string fitToSize(std::string path, unsigned int size)
 		std::string back = path.substr(newPos, (path.size() - newPos));
 		path = (front + dir + back);
 
-		pos = newPos;
+		pos = newPos - removed;
 	}
 	return path;
 }
