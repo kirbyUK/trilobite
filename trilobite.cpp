@@ -5,6 +5,8 @@
 #include <ncurses.h> 
 #include <iostream>
 #include <string>
+#include <vector>
+#include <algorithm>
 #include <cerrno>
 #include <unistd.h>
 
@@ -27,7 +29,7 @@ unsigned int screenX = 0, screenY = 0;
 int main(int argc, char* argv[])
 {
 	//The current working directory:
-	Directory* currentDir = NULL;
+	Directory* dir = NULL;
 
 	//Checks if too many arguments have been given:
 	if(argc > 2)
@@ -42,17 +44,18 @@ int main(int argc, char* argv[])
 		//Attempt to open 
 		try
 		{
-			currentDir = new Directory(argv[1]);
+			dir = new Directory(argv[1]);
 		}
 		catch(int e)
 		{
 			std::cerr << "Cannot open '" << argv[1] << "': ";
 			switch(errno)
 			{
-				case EACCES:  std::cerr << "Permission denied.\n"; break;
-				case ENOENT:  std::cerr << "No such directory.\n"; break;
-				case ENOTDIR: std::cerr << "Not a directory.\n"; break;
+				case EACCES:  std::cerr << "Permission denied."; break;
+				case ENOENT:  std::cerr << "No such directory."; break;
+				case ENOTDIR: std::cerr << "Not a directory."; break;
 			}
+			std::cerr << std::endl;
 			return -1;
 		}
 	}
@@ -60,20 +63,21 @@ int main(int argc, char* argv[])
 	//the user's current working directory:
 	else
 	{
+		char* cwd = get_current_dir_name();
 		try
 		{
-			char* cwd = get_current_dir_name();
-			currentDir = new Directory(cwd);
+			dir = new Directory(cwd);
 		}
 		catch(int e)
 		{
-			std::cerr << "Cannot open '" << argv[1] << "': ";
+			std::cerr << "Cannot open '" << cwd << "': ";
 			switch(errno)
 			{
-				case EACCES:  std::cerr << "Permission denied.\n"; break;
-				case ENOENT:  std::cerr << "No such directory.\n"; break;
-				case ENOTDIR: std::cerr << "Not a directory.\n"; break;
+				case EACCES:  std::cerr << "Permission denied."; break;
+				case ENOENT:  std::cerr << "No such directory."; break;
+				case ENOTDIR: std::cerr << "Not a directory."; break;
 			}
+			std::cerr << std::endl;
 			return -1;
 		}
 	}
@@ -92,16 +96,29 @@ int main(int argc, char* argv[])
 
 	//If nessecary, resizes the directory path:
 	std::string path = "";
-	if(currentDir->getPath().length() >= screenX)
-		path = fitToSize(currentDir->getPath(), (screenX - 2));
+	if(dir->getPath().length() >= screenX)
+		path = fitToSize(dir->getPath(), (screenX - 2));
 	else
-		path = currentDir->getPath();
-
+		path = dir->getPath();
 
 	//The X position needed to print the path in the centre:
 	int pos = ((screenX - path.length()) / 2);
 	//Write the user's current directory:
 	mvprintw(0, pos, "%s", path.c_str());
+
+	//Get the files and sort the contents:
+	std::vector <DiskItem*> items = dir->getFiles();
+	sort(items.begin(), items.end(), byName);
+
+	//Count the dotfiles:
+	int dotfiles = 0;
+	for(unsigned int i = 0; i < items.size(); i++)
+		if(items[i]->getName()[0] == '.')
+			dotfiles++;
+
+	//Print the contents, except the dotfiles, to the window:
+	for(unsigned int i = dotfiles; i < items.size(); i++)
+		mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
 
 	refresh();
 	wrefresh(fileview.window);

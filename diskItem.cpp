@@ -29,7 +29,19 @@ unsigned int DiskItem::getSize()
 
 bool byName(DiskItem* A, DiskItem* B)
 {
-	if(lowercase(A->getName()) < lowercase(B->getName()))
+	//Gives priority to dotfiles:
+	if(A->getName()[0] == '.')
+		return true;
+	else if(B->getName()[0] == '.')
+		return false;
+	else if((A->getName()[0] == '.') && (B->getName()[0] == '.'))
+	{
+		if(lowercase(A->getName()) < lowercase(B->getName()))
+			return true;
+		else
+			return false;
+	}
+	else if(lowercase(A->getName()) < lowercase(B->getName()))
 		return true;
 	else
 		return false;
@@ -39,6 +51,6 @@ std::string lowercase(std::string s)
 {
 	std::string out = "";
 	for(unsigned int i = 0; i < s.size(); i++)
-		out += tolower(s[i]);
+		out += tolower(s[0]);
 	return out;
 }
