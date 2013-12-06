@@ -85,47 +85,76 @@ int main(int argc, char* argv[])
 	//Initialise ncurses:
 	initscr();
 
+	//The colour pairs:
+	init_pair(2, COLOR_WHITE, COLOR_RED);
+	//Allows use of the up and down arrows:
+	keypad(stdscr, true);
+
 	start_color();
 	refresh();
 
 	//Hides the cursor:
 	curs_set(0);
 
-	updateWindows();
-	drawHelp();
+	int input = ' ';
+	unsigned int selection = 0;
+	while(input != 'q')
+	{
+		updateWindows();
+		drawHelp();
 
-	//If nessecary, resizes the directory path:
-	std::string path = "";
-	if(dir->getPath().length() >= screenX)
-		path = fitToSize(dir->getPath(), (screenX - 2));
-	else
-		path = dir->getPath();
+		//If nessecary, resizes the directory path:
+		std::string path = "";
+		if(dir->getPath().length() >= screenX)
+			path = fitToSize(dir->getPath(), (screenX - 2));
+		else
+			path = dir->getPath();
 
-	//The X position needed to print the path in the centre:
-	int pos = ((screenX - path.length()) / 2);
-	//Write the user's current directory:
-	mvprintw(0, pos, "%s", path.c_str());
+		//The X position needed to print the path in the centre:
+		int pos = ((screenX - path.length()) / 2);
+		//Write the user's current directory:
+		mvprintw(0, pos, "%s", path.c_str());
 
-	//Get the files and sort the contents:
-	std::vector <DiskItem*> items = dir->getFiles();
-	sort(items.begin(), items.end(), byName);
+		//Get the files and sort the contents:
+		std::vector <DiskItem*> items = dir->getFiles();
+		sort(items.begin(), items.end(), byName);
 
-	//Count the dotfiles:
-	int dotfiles = 0;
-	for(unsigned int i = 0; i < items.size(); i++)
+		//Count the dotfiles:
+		unsigned int dotfiles = 0;
+		for(unsigned int i = 0; i < items.size(); i++)
 		if(items[i]->getName()[0] == '.')
 			dotfiles++;
 
-	//Print the contents, except the dotfiles, to the window:
-	for(unsigned int i = dotfiles; i < items.size(); i++)
-		mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+		//Print the contents, except the dotfiles, to the window:
+		for(unsigned int i = dotfiles; i < items.size(); i++)
+		{
+			//If we're printing the current selection, highlight it:
+			if(selection == (i - dotfiles))
+			{
+//				wattron(fileview.window, COLOR_PAIR(1));
+				mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+				wchgat(fileview.window, -1, A_STANDOUT, 0, NULL);
+//				wattroff(fileview.window, COLOR_PAIR(1));
+			}
+			else
+				mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+		}
 
-	refresh();
-	wrefresh(fileview.window);
-	wrefresh(fileinfo.window);
-	wrefresh(extrainfo.window);
+		refresh();
+		wrefresh(fileview.window);
+		wrefresh(fileinfo.window);
+		wrefresh(extrainfo.window);
 
-	getch();
+		//Gets the input:
+		input = getch();
+
+		//Moves the selection up or down if those keys were pressed:
+		switch(input)
+		{
+			case KEY_UP: 	if(selection > 0) selection--; break;
+			case KEY_DOWN: 	if(selection < ((items.size() - dotfiles) - 1)) selection++; break;
+		}
+	}
 
 	//Close ncurses:
 	endwin();
@@ -135,6 +164,11 @@ int main(int argc, char* argv[])
 //Updates the window size:
 void updateWindows()
 {
+	//Clears the windows:
+	wclear(fileview.window);
+	wclear(fileinfo.window);
+	wclear(extrainfo.window);
+
 	//Gets the screen size:
 	getmaxyx(stdscr, screenY, screenX);
 
