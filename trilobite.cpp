@@ -131,10 +131,8 @@ int main(int argc, char* argv[])
 			//If we're printing the current selection, highlight it:
 			if(selection == (i - dotfiles))
 			{
-//				wattron(fileview.window, COLOR_PAIR(1));
-				mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
-				wchgat(fileview.window, -1, A_STANDOUT, 0, NULL);
-//				wattroff(fileview.window, COLOR_PAIR(1));
+				mvwprintw(fileview.window,((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+				mvwchgat(fileview.window, ((i - dotfiles) + 1), 1, (fileview.width - 2), A_NORMAL, 1, NULL);
 			}
 			else
 				mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
