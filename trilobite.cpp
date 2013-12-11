@@ -17,7 +17,7 @@ std::string fitToSize(std::string path, unsigned int size);
 struct windows
 {
 	WINDOW* window;
-	int x, y, height, width;
+	unsigned int x, y, height, width;
 } fileview, fileinfo, extrainfo;
 
 //The help text at the bottom:
@@ -125,17 +125,69 @@ int main(int argc, char* argv[])
 		if(items[i]->getName()[0] == '.')
 			dotfiles++;
 
-		//Print the contents, except the dotfiles, to the window:
-		for(unsigned int i = dotfiles; i < items.size(); i++)
+		//Checks if the contents of the directory will fit in the window:
+		if((fileview.height - 2) > (items.size() - dotfiles))
 		{
-			//If we're printing the current selection, highlight it:
-			if(selection == (i - dotfiles))
+			//Print the contents, except the dotfiles, to the window:
+			for(unsigned int i = dotfiles; i < items.size(); i++)
 			{
-				mvwprintw(fileview.window,((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
-				mvwchgat(fileview.window, ((i - dotfiles) + 1), 1, (fileview.width - 2), A_NORMAL, 1, NULL);
+				//If we're printing the current selection, highlight it:
+				if(selection == (i - dotfiles))
+				{
+					//Print the name:
+					mvwprintw(fileview.window,((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+
+					//Move to the beginning of the line, and highlight the line up to but excluding the window border:
+					mvwchgat(fileview.window, ((i - dotfiles) + 1), 1, (fileview.width - 2), A_NORMAL, 1, NULL);
+				}
+				else
+					//Print the name:
+					mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
 			}
+		}
+		//Otherwise, we can only print part of the directory's contents:
+		else
+		{
+			//If the selection is less than the height, display the first few items:
+			if(selection < (fileview.height - 2))
+			{
+				for(unsigned int i = dotfiles; i < ((fileview.height - 2) + dotfiles); i++)
+				{
+					//If we're printing the current selection, highlight it:
+					if(selection == (i - dotfiles))
+					{
+						//Print the name:
+						mvwprintw(fileview.window,((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+
+						//Move to the beginning of the line, and highlight the line up to but excluding the window border:
+						mvwchgat(fileview.window, ((i - dotfiles) + 1), 1, (fileview.width - 2), A_NORMAL, 1, NULL);
+					}
+					else
+						//Print the name:
+						mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+				}
+			}
+			//Otherwise, display the selection as the last item:
 			else
-				mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+			{
+				for(unsigned int i = (dotfiles + ((selection + 1) - (fileview.height - 2))); i < ((selection + 1) + dotfiles); i++)
+				{
+					unsigned int y = i - ((selection + 1) - (fileview.height - 2)) - 2;
+
+					//If we're printing the current selection, highlight it:
+					if(selection == (i - dotfiles))
+					{
+						//Print the name:
+						mvwprintw(fileview.window, y, 1, "%s", items[i]->getName().c_str());
+
+						//Move to the beginning of the line, and highlight the line up to but excluding the window border:
+						mvwchgat(fileview.window, y, 1, (fileview.width - 2), A_NORMAL, 1, NULL);
+					}
+					else
+						//Print the name:
+						mvwprintw(fileview.window, y, 1, "%s", items[i]->getName().c_str());
+				}
+			}
 		}
 
 		refresh();
