@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 			{
 				for(unsigned int i = (dotfiles + ((selection + 1) - (fileview.height - 2))); i < ((selection + 1) + dotfiles); i++)
 				{
-					unsigned int y = i - ((selection + 1) - (fileview.height - 2)) - 2;
+					unsigned int y = i - ((selection - (fileview.height - 2)) + dotfiles);
 
 					//If we're printing the current selection, highlight it:
 					if(selection == (i - dotfiles))
