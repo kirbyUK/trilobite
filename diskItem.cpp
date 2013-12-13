@@ -33,7 +33,8 @@ std::string DiskItem::getFormattedSize()
 {
 	//The formatted string:
 	std::stringstream formatted;
-	formatted.precision(2);
+	formatted.precision(0);
+	formatted.setf(std::ios::fixed);
 
 	//Checks if the size is in bytes:
 	if((_size / pow(2, 10)) < 1)
