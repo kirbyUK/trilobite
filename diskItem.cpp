@@ -1,6 +1,8 @@
 #include "diskItem.h"
+#include <sstream>
 #include <cstdio>
 #include <cctype>
+#include <cmath>
 
 void DiskItem::cut()
 {
@@ -25,6 +27,48 @@ std::string DiskItem::getPath()
 unsigned int DiskItem::getSize()
 {
 	return _size;
+}
+
+std::string DiskItem::getFormattedSize()
+{
+	//The formatted string:
+	std::stringstream formatted;
+	formatted.precision(2);
+
+	//Checks if the size is in bytes:
+	if((_size / pow(2, 10)) < 1)
+	{
+		formatted << _size << "B";
+		return formatted.str();
+	}
+	//Checks if the size is in kilobytes:
+	else if((_size / pow(2, 20)) < 1)
+	{
+		float newSize = (_size / pow(2, 10));
+		formatted << newSize << "kB";
+		return formatted.str();
+	}
+	//Checks if the size is in megabytes:
+	else if((_size / pow(2, 30)) < 1)
+	{
+		float newSize = (_size / pow(2, 20));
+		formatted << newSize << "MB";
+		return formatted.str();
+	}
+	//Checks if the size is in gigabytes:
+	else if((_size / pow(2, 40)) < 1)
+	{
+		float newSize = (_size / pow(2, 30));
+		formatted << newSize << "GB";
+		return formatted.str();
+	}
+	//Checks if the size is in terabytes:
+	else if((_size / pow(2, 50)) < 1)
+	{
+		float newSize = (_size / pow(2, 40));
+		formatted << newSize << "TB";
+		return formatted.str();
+	}
 }
 
 bool byName(DiskItem* A, DiskItem* B)

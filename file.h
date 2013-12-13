@@ -26,7 +26,6 @@ class File : public DiskItem
 		//Getters:
 		std::string getPath();
 		std::string getName();
-		unsigned int getSize();
 };
 
 #endif

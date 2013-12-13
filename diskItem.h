@@ -33,6 +33,7 @@ class DiskItem
 		std::string getPath();
 		virtual std::string getName() = 0;
 		unsigned int getSize();
+		std::string getFormattedSize();
 };
 
 //Checks the names of the two items passed,
