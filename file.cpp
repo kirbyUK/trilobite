@@ -16,18 +16,6 @@ File::File(const char* path)
 	if(S_ISDIR(_attr->st_mode) != 0)
 		throw errno;
 
-	//'path' should be the full file path,
-	//so we can open it for reading immediately:
-	//We open it in binary mode as we do not want
-	//to parse the contents, simply read them and
-	//get the size:
-	std::ifstream in(path, std::ios::binary);
-	
-	//However, if there is an issue reading the file,
-	//throw an error:
-	if(! in)
-		throw errno;
-
 	//Gets the size:
 	_size = _attr->st_size;
 
