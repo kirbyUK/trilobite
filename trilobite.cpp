@@ -10,8 +10,13 @@
 #include <cerrno>
 #include <unistd.h>
 
+//Prints the given DiskItem's metadata to the fileinfo window:
+void printMetaData(DiskItem* item);
+
 void updateWindows();
 void drawHelp();
+
+//Takes a directory path, and returns it shrunk to fit the size:
 std::string fitToSize(std::string path, unsigned int size);
 
 struct windows
@@ -190,6 +195,8 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		printMetaData(items[selection + dotfiles]);
+
 		refresh();
 		wrefresh(fileview.window);
 		wrefresh(fileinfo.window);
@@ -209,6 +216,31 @@ int main(int argc, char* argv[])
 	//Close ncurses:
 	endwin();
 	return 0;
+}
+
+//Prints the given DiskItem's metadata to the fileinfo window:
+void printMetaData(DiskItem* item)
+{
+	//Gets the size of window, so we know how much we can print:
+	unsigned int h = fileinfo.height - 2;
+	
+	//Print the name:
+	if(h > 0) mvwprintw(fileinfo.window, 1, 1, "%s", item->getName().c_str());
+
+	//Print if it is a file or directory:
+	if(item->getName()[item->getName().size() - 1] == '/')
+	{
+		if(h > 1)
+			mvwprintw(fileinfo.window, 2, 1, "%s", "Directory");
+	}
+	else
+	{
+		if(h > 1)
+			mvwprintw(fileinfo.window, 2, 1, "%s", "File");
+	}
+
+	//Print the filesize:
+	if(h > 2) mvwprintw(fileinfo.window, 3, 1, "%s", item->getFormattedSize().c_str());
 }
 
 //Updates the window size:
