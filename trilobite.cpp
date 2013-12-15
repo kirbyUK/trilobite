@@ -213,6 +213,8 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	delete dir;
+
 	//Close ncurses:
 	endwin();
 	return 0;
