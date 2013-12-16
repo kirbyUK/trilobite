@@ -86,6 +86,22 @@ int main(int argc, char* argv[])
 			return -1;
 		}
 	}
+	try
+	{
+		dir->read();
+	}
+	catch(int e)
+	{
+		std::cerr << "Cannot open '" << dir->getPath() << "': ";
+		switch(errno)
+		{
+			case EACCES:  std::cerr << "Permission denied."; break;
+			case ENOENT:  std::cerr << "No such directory."; break;
+			case ENOTDIR: std::cerr << "Not a directory."; break;
+		}
+		std::cerr << std::endl;
+		return -1;
+	}
 
 	//Initialise ncurses:
 	initscr();

@@ -19,6 +19,8 @@ class File : public DiskItem
 		File(const char*);
 		~File();
 
+		void calcSize() { }
+
 		//File operation functions:
 		bool paste(std::string);
 		bool deletef();

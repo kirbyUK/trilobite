@@ -26,8 +26,26 @@ Directory::Directory(const char* path)
 	if(_path[_path.size() - 1] != '/')
 		_path += '/';
 
+	_isCut = false;
+}
+
+Directory::~Directory()
+{
+	//Deletes all the file and directory objects
+	//associated with the directory:
+	for(unsigned int i = 0; i < _files.size(); i++)
+		delete _files[i];
+
+	//Deletes the directory attributes:
+	delete _attr;
+}
+
+//Reads the first layer of files and directories:
+void Directory::read()
+{
+
 	//Creates a pointer to a 'DIR' struct:
-	DIR* dir = opendir(path);
+	DIR* dir = opendir(_path.c_str());
 	if(dir == NULL)
 		throw errno;
 
@@ -56,13 +74,14 @@ Directory::Directory(const char* path)
 		struct stat* attr = new struct stat;
 		if(stat(filepath.c_str(), attr) != 0)
 			throw errno;
-		
+
 		if(S_ISDIR(attr->st_mode) != 0)
 		{
 			//Attempt to open the directory:
 			try
 			{
 				file = new Directory(filepath.c_str());	
+				file->calcSize();
 			}
 			catch(int errno)
 			{
@@ -90,26 +109,77 @@ Directory::Directory(const char* path)
 		//Read the next entry:
 		dir_contents = readdir(dir);
 	}
-
-	_size = _attr->st_size;
-
-	//Gets the size of the directory by adding the size of
-	//the contents together:
-	for(unsigned int i = 0; i < _files.size(); i++)
-		_size += _files[i]->getSize();	
-
-	_isCut = false;
 }
 
-Directory::~Directory()
+//Calculates the size of a directory:
+void Directory::calcSize()
 {
-	//Deletes all the file and directory objects
-	//associated with the directory:
-	for(unsigned int i = 0; i < _files.size(); i++)
-		delete _files[i];
+	_size = _attr->st_size;
 
-	//Deletes the directory attributes:
-	delete _attr;
+	//Creates a pointer to a 'DIR' struct:
+	DIR* dir = opendir(_path.c_str());
+	if(dir == NULL)
+		throw errno;
+
+	//Creates a pointer to a 'dirent' struct:
+	dirent* dir_contents = readdir(dir);
+
+	//While there is stuff to read:
+	while(dir_contents != 0)
+	{
+		std::string name = dir_contents->d_name;
+
+		//Checks we are not reading ".":
+		if((name == ".") || (name == ".."))
+		{
+			//Read the next entry:
+			dir_contents = readdir(dir);
+			continue;
+		}
+
+		//The full path of the file:
+		std::string filepath = _path + name;
+
+		//Checks if the path is a directory or a file:
+		struct stat* attr = new struct stat;
+		if(stat(filepath.c_str(), attr) != 0)
+			throw errno;
+		
+		DiskItem* file = NULL;
+
+		if(S_ISDIR(attr->st_mode) != 0)
+		{
+			//Attempt to open the directory:
+			try
+			{
+				file = new Directory(filepath.c_str());	
+				file->calcSize();
+			}
+			catch(int errno)
+			{
+				throw errno;
+			}
+			//Get the directory's size:
+			_size += file->getSize();
+		}
+		else
+		{
+			//Attempt to open the file:
+			try
+			{
+				file = new File(filepath.c_str());
+			}
+			catch(int errno)
+			{
+				throw errno;
+			}
+			//Get the file's size:
+			_size += file->getSize();
+		}
+		dir_contents = readdir(dir);
+		delete attr;
+		delete file;
+	}
 }
 
 bool Directory::paste(std::string newpath)

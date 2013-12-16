@@ -23,6 +23,9 @@ class DiskItem
 		//Virtual destructor:
 		virtual ~DiskItem() { }
 
+		//Needed for the directory:
+		virtual void calcSize() = 0;
+
 		//Operation functions:
 		void cut();
 		virtual bool paste(std::string) = 0;

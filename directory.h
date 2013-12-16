@@ -23,6 +23,12 @@ class Directory : public DiskItem
 		//Destructor:
 		~Directory();
 
+		//Reads the contents of the directory:
+		void read();
+
+		//Calculates the size of the directory:
+		void calcSize();
+
 		//Directory operation functions:
 		bool paste(std::string);
 		bool deletef();
