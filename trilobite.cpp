@@ -227,6 +227,41 @@ int main(int argc, char* argv[])
 			case KEY_UP: 	if(selection > 0) selection--; break;
 			case KEY_DOWN: 	if(selection < ((items.size() - dotfiles) - 1)) selection++; break;
 		}
+		//If the user has pressed Enter:
+		if(char(input) == '\n')
+		{
+			//Attempts to cast the current selection to a Directory*:
+			Directory* selected = dynamic_cast <Directory*>(items[selection + dotfiles]);
+
+			//If the user has selected a directory:
+			if(selected != NULL)
+			{
+				//Keep the old directory so we can delete it:
+				Directory* oldDir = dir;
+
+				//Makes a copy of the directory we want to move to:
+				try
+				{
+					dir = new Directory(selected);
+					dir->read();
+				}
+				catch(int e)
+				{
+					std::cerr << "Cannot open '" << dir->getPath() << "': ";
+					switch(errno)
+					{
+						case EACCES:  std::cerr << "Permission denied."; break;
+						case ENOENT:  std::cerr << "No such directory."; break;
+						case ENOTDIR: std::cerr << "Not a directory."; break;
+					}
+					std::cerr << std::endl;
+					return -1;
+				}
+
+				delete oldDir;
+				selection = 0;
+			}
+		}
 	}
 
 	delete dir;

@@ -19,6 +19,7 @@ class Directory : public DiskItem
 	public:
 		//Constructor: 
 		Directory(const char*);
+		Directory(Directory*);
 
 		//Destructor:
 		~Directory();

@@ -29,6 +29,20 @@ Directory::Directory(const char* path)
 	_isCut = false;
 }
 
+//Makes a copy of the passed DiskItem:
+Directory::Directory(Directory* dir)
+{
+	_size = dir->getSize();
+	_path = dir->getPath();
+	_files = dir->getFiles();
+	_isCut = false;
+
+	//Reads the directory's attributes into '_attr':
+	_attr = new struct stat;
+	if(stat(_path.c_str(), _attr) != 0)
+		throw errno;
+}
+
 Directory::~Directory()
 {
 	//Deletes all the file and directory objects
