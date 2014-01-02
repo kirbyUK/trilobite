@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <string>
 #include <algorithm>
-#include <iostream>
 
 Directory::Directory(const char* path)
 {
