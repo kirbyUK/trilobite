@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 		catch(int e)
 		{
 			std::cerr << "Cannot open '" << argv[1] << "': ";
-			switch(errno)
+			switch(e)
 			{
 				case EACCES:  std::cerr << "Permission denied."; break;
 				case ENOENT:  std::cerr << "No such directory."; break;
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 		catch(int e)
 		{
 			std::cerr << "Cannot open '" << cwd << "': ";
-			switch(errno)
+			switch(e)
 			{
 				case EACCES:  std::cerr << "Permission denied."; break;
 				case ENOENT:  std::cerr << "No such directory."; break;
@@ -124,6 +124,10 @@ int main(int argc, char* argv[])
 		updateWindows();
 		drawHelp();
 
+		//Cleans the path is nessecary:
+		if(dir->getName() == "../")
+			dir->cleanPath();
+
 		//If nessecary, resizes the directory path:
 		std::string path = "";
 		if(dir->getPath().length() >= screenX)
@@ -138,32 +142,25 @@ int main(int argc, char* argv[])
 
 		//Get the files and sort the contents:
 		std::vector <DiskItem*> items = dir->getFiles();
-		sort(items.begin(), items.end(), byName);
-
-		//Count the dotfiles:
-		unsigned int dotfiles = 0;
-		for(unsigned int i = 0; i < items.size(); i++)
-		if(items[i]->getName()[0] == '.')
-			dotfiles++;
 
 		//Checks if the contents of the directory will fit in the window:
-		if((fileview.height - 2) > (items.size() - dotfiles))
+		if((fileview.height - 2) > (items.size() - dir->getDotfiles()))
 		{
 			//Print the contents, except the dotfiles, to the window:
-			for(unsigned int i = dotfiles; i < items.size(); i++)
+			for(unsigned int i = dir->getDotfiles(); i < items.size(); i++)
 			{
 				//If we're printing the current selection, highlight it:
-				if(selection == (i - dotfiles))
+				if(selection == (i - dir->getDotfiles()))
 				{
 					//Print the name:
-					mvwprintw(fileview.window,((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+					mvwprintw(fileview.window,((i - dir->getDotfiles()) + 1), 1, "%s", items[i]->getName().c_str());
 
 					//Move to the beginning of the line, and highlight the line up to but excluding the window border:
-					mvwchgat(fileview.window, ((i - dotfiles) + 1), 1, (fileview.width - 2), A_NORMAL, 1, NULL);
+					mvwchgat(fileview.window, ((i - dir->getDotfiles()) + 1), 1, (fileview.width - 2), A_NORMAL, 1, NULL);
 				}
 				else
 					//Print the name:
-					mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+					mvwprintw(fileview.window, ((i - dir->getDotfiles()) + 1), 1, "%s", items[i]->getName().c_str());
 			}
 		}
 		//Otherwise, we can only print part of the directory's contents:
@@ -172,31 +169,31 @@ int main(int argc, char* argv[])
 			//If the selection is less than the height, display the first few items:
 			if(selection < (fileview.height - 2))
 			{
-				for(unsigned int i = dotfiles; i < ((fileview.height - 2) + dotfiles); i++)
+				for(unsigned int i = dir->getDotfiles(); i < ((fileview.height - 2) + dir->getDotfiles()); i++)
 				{
 					//If we're printing the current selection, highlight it:
-					if(selection == (i - dotfiles))
+					if(selection == (i - dir->getDotfiles()))
 					{
 						//Print the name:
-						mvwprintw(fileview.window,((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+						mvwprintw(fileview.window,((i - dir->getDotfiles()) + 1), 1, "%s", items[i]->getName().c_str());
 
 						//Move to the beginning of the line, and highlight the line up to but excluding the window border:
-						mvwchgat(fileview.window, ((i - dotfiles) + 1), 1, (fileview.width - 2), A_NORMAL, 1, NULL);
+						mvwchgat(fileview.window, ((i - dir->getDotfiles()) + 1), 1, (fileview.width - 2), A_NORMAL, 1, NULL);
 					}
 					else
 						//Print the name:
-						mvwprintw(fileview.window, ((i - dotfiles) + 1), 1, "%s", items[i]->getName().c_str());
+						mvwprintw(fileview.window, ((i - dir->getDotfiles()) + 1), 1, "%s", items[i]->getName().c_str());
 				}
 			}
 			//Otherwise, display the selection as the last item:
 			else
 			{
-				for(unsigned int i = (dotfiles + ((selection + 1) - (fileview.height - 2))); i < ((selection + 1) + dotfiles); i++)
+				for(unsigned int i = (dir->getDotfiles() + ((selection + 1) - (fileview.height - 2))); i < ((selection + 1) + dir->getDotfiles()); i++)
 				{
-					unsigned int y = i - ((selection - (fileview.height - 2)) + dotfiles);
+					unsigned int y = i - ((selection - (fileview.height - 2)) + dir->getDotfiles());
 
 					//If we're printing the current selection, highlight it:
-					if(selection == (i - dotfiles))
+					if(selection == (i - dir->getDotfiles()))
 					{
 						//Print the name:
 						mvwprintw(fileview.window, y, 1, "%s", items[i]->getName().c_str());
@@ -211,7 +208,7 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		printMetaData(items[selection + dotfiles]);
+		printMetaData(items[selection + dir->getDotfiles()]);
 
 		refresh();
 		wrefresh(fileview.window);
@@ -225,13 +222,13 @@ int main(int argc, char* argv[])
 		switch(input)
 		{
 			case KEY_UP: 	if(selection > 0) selection--; break;
-			case KEY_DOWN: 	if(selection < ((items.size() - dotfiles) - 1)) selection++; break;
+			case KEY_DOWN: 	if(selection < ((items.size() - dir->getDotfiles()) - 1)) selection++; break;
 		}
 		//If the user has pressed Enter:
 		if(char(input) == '\n')
 		{
 			//Attempts to cast the current selection to a Directory*:
-			Directory* selected = dynamic_cast <Directory*>(items[selection + dotfiles]);
+			Directory* selected = dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]);
 
 			//If the user has selected a directory:
 			if(selected != NULL)
@@ -293,13 +290,15 @@ void printMetaData(DiskItem* item)
 	}
 
 	//Print the filesize:
-	if(h > 2) mvwprintw(fileinfo.window, 3, 1, "%s", item->getFormattedSize().c_str());
+	if((h > 2) && (item->getName() != "../"))
+		mvwprintw(fileinfo.window, 3, 1, "%s", item->getFormattedSize().c_str());
 }
 
 //Updates the window size:
 void updateWindows()
 {
 	//Clears the windows:
+	clear();
 	wclear(fileview.window);
 	wclear(fileinfo.window);
 	wclear(extrainfo.window);

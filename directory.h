@@ -16,6 +16,9 @@ class Directory : public DiskItem
 		//The files the directory contains:
 		std::vector <DiskItem*> _files;
 
+		//The number of dotfiles in the directory:
+		unsigned int _dotfiles;
+
 	public:
 		//Constructor: 
 		Directory(const char*);
@@ -34,9 +37,13 @@ class Directory : public DiskItem
 		bool paste(std::string);
 		bool deletef();
 
+		//Cleans the path to remove '../':
+		void cleanPath();
+
 		//Getters:
 		std::string getName();
 		std::vector <DiskItem*>& getFiles();
+		unsigned int getDotfiles();
 };
 
 #endif

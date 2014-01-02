@@ -6,6 +6,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string>
+#include <algorithm>
+#include <iostream>
 
 Directory::Directory(const char* path)
 {
@@ -57,7 +59,6 @@ Directory::~Directory()
 //Reads the first layer of files and directories:
 void Directory::read()
 {
-
 	//Creates a pointer to a 'DIR' struct:
 	DIR* dir = opendir(_path.c_str());
 	if(dir == NULL)
@@ -92,14 +93,15 @@ void Directory::read()
 		if(S_ISDIR(attr->st_mode) != 0)
 		{
 			//Attempt to open the directory:
+
 			try
 			{
 				file = new Directory(filepath.c_str());	
 				file->calcSize();
 			}
-			catch(int errno)
+			catch(int e)
 			{
-				throw errno;
+				throw e;
 			}
 		}
 		else
@@ -109,9 +111,9 @@ void Directory::read()
 			{
 				file = new File(filepath.c_str());
 			}
-			catch(int errno)
+			catch(int e)
 			{
-				throw errno;
+				throw e;
 			}
 		}
 		//Delete the 'struct stat':
@@ -122,6 +124,30 @@ void Directory::read()
 
 		//Read the next entry:
 		dir_contents = readdir(dir);
+	}
+
+	sort(_files.begin(), _files.end(), byName);
+
+	//Count the dotfiles:
+	_dotfiles = 0;
+	for(unsigned int i = 0; i < _files.size(); i++)
+		if(_files[i]->getName()[0] == '.')
+			_dotfiles++;
+
+	//Finally, add a link to the parent dir at the front:
+	if(_path != "/")
+	{
+		DiskItem* parent = NULL;
+		std::string path = _path + "../";
+		try
+		{
+			parent = new Directory(path.c_str());
+		}
+		catch(int e)
+		{
+			throw e;
+		}
+		_files.insert(_files.begin() + _dotfiles, parent);
 	}
 }
 
@@ -232,6 +258,22 @@ bool Directory::deletef()
 	return true; 
 }
 
+//Say the directory path is '/home/alex/Code/trilobite/../'.
+//This cleans it up so it's just '/home/alex/Code/'. It just takes
+//out the last two items from the path, so be sure to check for '../'
+//at the end before it is used:
+void Directory::cleanPath()
+{
+
+	//Finds the 2nd to last '/':
+	int pos1 = _path.find_last_of('/', (_path.size() - 2));
+
+	//Using that, find the 3rd to last '/':
+	int pos2 = _path.find_last_of('/', (pos1 - 1));
+
+	_path = _path.substr(0, (pos2 + 1));
+}
+
 std::string Directory::getName()
 {
 	//Gets the position of the second to last '/', as
@@ -246,4 +288,9 @@ std::string Directory::getName()
 std::vector <DiskItem*>& Directory::getFiles()
 {
 	return _files;
+}
+
+unsigned int Directory::getDotfiles()
+{
+	return _dotfiles;
 }
