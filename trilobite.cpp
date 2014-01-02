@@ -257,6 +257,8 @@ int main(int argc, char* argv[])
 
 				delete oldDir;
 				selection = 0;
+
+				clear();
 			}
 		}
 	}
@@ -298,7 +300,6 @@ void printMetaData(DiskItem* item)
 void updateWindows()
 {
 	//Clears the windows:
-	clear();
 	wclear(fileview.window);
 	wclear(fileinfo.window);
 	wclear(extrainfo.window);
