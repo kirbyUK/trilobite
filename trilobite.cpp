@@ -118,6 +118,7 @@ int main(int argc, char* argv[])
 	curs_set(0);
 
 	int input = ' ';
+	std::string path = "";
 	unsigned int selection = 0;
 	while(input != 'q')
 	{
@@ -129,7 +130,7 @@ int main(int argc, char* argv[])
 			dir->cleanPath();
 
 		//If nessecary, resizes the directory path:
-		std::string path = "";
+		path = "";
 		if(dir->getPath().length() >= screenX)
 			path = fitToSize(dir->getPath(), (screenX - 2));
 		else

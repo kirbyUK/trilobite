@@ -87,12 +87,18 @@ void Directory::read()
 		//Checks if the path is a directory or a file:
 		struct stat* attr = new struct stat;
 		if(stat(filepath.c_str(), attr) != 0)
-			throw errno;
+		{
+			//Delete the 'struct stat':
+			delete attr;
+
+			//Read the next entry:
+			dir_contents = readdir(dir);
+			continue;
+		}
 
 		if(S_ISDIR(attr->st_mode) != 0)
 		{
 			//Attempt to open the directory:
-
 			try
 			{
 				file = new Directory(filepath.c_str());	
@@ -100,7 +106,12 @@ void Directory::read()
 			}
 			catch(int e)
 			{
-				throw e;
+				//Delete the 'struct stat':
+				delete attr;
+
+				//Read the next entry:
+				dir_contents = readdir(dir);
+				continue;
 			}
 		}
 		else
@@ -112,7 +123,12 @@ void Directory::read()
 			}
 			catch(int e)
 			{
-				throw e;
+				//Delete the 'struct stat':
+				delete attr;
+
+				//Read the next entry:
+				dir_contents = readdir(dir);
+				continue;
 			}
 		}
 		//Delete the 'struct stat':
@@ -124,8 +140,10 @@ void Directory::read()
 		//Read the next entry:
 		dir_contents = readdir(dir);
 	}
+	//Close the directory:
+	closedir(dir);
 
-	sort(_files.begin(), _files.end(), byName);
+	std::sort(_files.begin(), _files.end(), byName);
 
 	//Count the dotfiles:
 	_dotfiles = 0;
@@ -182,7 +200,14 @@ void Directory::calcSize()
 		//Checks if the path is a directory or a file:
 		struct stat* attr = new struct stat;
 		if(stat(filepath.c_str(), attr) != 0)
-			throw errno;
+		{
+				//Delete the 'struct stat':
+				delete attr;
+
+				//Read the next entry:
+				dir_contents = readdir(dir);
+				continue;
+		}
 		
 		DiskItem* file = NULL;
 
@@ -194,9 +219,9 @@ void Directory::calcSize()
 				file = new Directory(filepath.c_str());	
 				file->calcSize();
 			}
-			catch(int errno)
+			catch(int e)
 			{
-				throw errno;
+				throw e;
 			}
 			//Get the directory's size:
 			_size += file->getSize();
@@ -208,9 +233,9 @@ void Directory::calcSize()
 			{
 				file = new File(filepath.c_str());
 			}
-			catch(int errno)
+			catch(int e)
 			{
-				throw errno;
+				throw e;
 			}
 			//Get the file's size:
 			_size += file->getSize();
@@ -219,6 +244,8 @@ void Directory::calcSize()
 		delete attr;
 		delete file;
 	}
+	//Close the directory:
+	closedir(dir);
 }
 
 bool Directory::paste(std::string newpath)
