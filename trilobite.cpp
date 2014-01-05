@@ -15,6 +15,7 @@ void printMetaData(DiskItem* item);
 
 void updateWindows();
 void drawHelp();
+void messageBox(std::string);
 
 //Takes a directory path, and returns it shrunk to fit the size:
 std::string fitToSize(std::string path, unsigned int size);
@@ -23,10 +24,10 @@ struct windows
 {
 	WINDOW* window;
 	unsigned int x, y, height, width;
-} fileview, fileinfo, extrainfo;
+} fileview, fileinfo, extrainfo, messagebox;
 
 //The help text at the bottom:
-const std::string HELP_TEXT = " X: Cut C: Copy V: Paste R: Rename D: Delete ?: Help";
+const std::string HELP_TEXT = " X: Cut C: Copy V: Paste R: Rename D: Delete Q: Quit";
 
 //The height and width of the window:
 unsigned int screenX = 0, screenY = 0;
@@ -116,8 +117,9 @@ int main(int argc, char* argv[])
 
 	//Hides the cursor:
 	curs_set(0);
+	noecho();
 
-	int input = ' ';
+	int input = 0;
 	std::string path = "";
 	unsigned int selection = 0;
 	while(input != 'q')
@@ -242,24 +244,37 @@ int main(int argc, char* argv[])
 				{
 					dir = new Directory(selected);
 					dir->read();
+
+					delete oldDir;
+					selection = 0;
+
+					clear();
 				}
 				catch(int e)
 				{
-					std::cerr << "Cannot open '" << dir->getPath() << "': ";
+					std::string error = "Cannot open '" + dir->getPath() + "' ";
 					switch(errno)
 					{
-						case EACCES:  std::cerr << "Permission denied."; break;
-						case ENOENT:  std::cerr << "No such directory."; break;
-						case ENOTDIR: std::cerr << "Not a directory."; break;
+						case EACCES:  error += "Permission denied."; break;
+						case ENOENT:  error += "No such directory."; break;
+						case ENOTDIR: error += "Not a directory."; break;
 					}
-					std::cerr << std::endl;
-					return -1;
+					messageBox(error);
 				}
-
-				delete oldDir;
-				selection = 0;
-
-				clear();
+			}
+		}
+		else if((char(input) == 'd') || (char(input) == 'D'))
+		{
+			DiskItem* selected = items[selection + dir->getDotfiles()];
+			if(selected->deletef())
+			{
+				delete selected;
+				dir->getFiles().erase(dir->getFiles().begin() + (selection + dir->getDotfiles()));
+			}
+			else
+			{
+				std::string error = "Could not delete '" + selected->getPath() + "'";
+				messageBox(error);
 			}
 		}
 	}
@@ -339,6 +354,50 @@ void drawHelp()
 	attron(COLOR_PAIR(1));
 	mvprintw((screenY - 1), 0, "%s", HELP_TEXT.c_str());
 	attroff(COLOR_PAIR(1));
+}
+
+//Creates a message box with the given message and keeps it on screen:
+void messageBox(std::string message)
+{
+	init_pair(4, COLOR_WHITE, COLOR_BLUE);
+	init_pair(5, COLOR_WHITE, COLOR_RED);
+
+	//Resize the message box:
+	messagebox.width = message.length() + 6;
+	messagebox.height = screenY / 4;
+	messagebox.x = ((screenX / 2) - (messagebox.width / 2));
+	messagebox.y = ((screenY / 2) - (messagebox.height / 2));
+	messagebox.window = newwin(messagebox.height, messagebox.width, messagebox.y, messagebox.x);
+
+	//Set the background:
+	wbkgd(messagebox.window, COLOR_PAIR(4));
+
+	//Calculate the position of the text:
+	unsigned int textX = 3;
+	unsigned int textY = 2;
+
+	//Calculate the poistion of the <OK> 'button':
+	unsigned int buttonX = (messagebox.width / 2) - 2;
+	unsigned int buttonY = messagebox.height - 2;
+
+	//Write the text:
+	mvwprintw(messagebox.window, textY, textX, "%s", message.c_str());
+
+	//Write the <OK> 'button':
+	wattron(messagebox.window, COLOR_PAIR(5));
+	mvwprintw(messagebox.window, buttonY, buttonX, "%s", "<OK>");
+	wattroff(messagebox.window, COLOR_PAIR(5));
+
+	refresh();
+	wrefresh(messagebox.window);
+
+	int input = 0;
+	while(char(input) != '\n')
+		input = getch();	
+
+	//Clear the window:
+	wclear(messagebox.window);
+	clear();
 }
 
 //Takes a directory path and returns it shrunk to the given size or smaller:

@@ -272,11 +272,15 @@ bool Directory::paste(std::string newpath)
 
 bool Directory::deletef()
 {
+	read();
 	//Deletes the files and directories contained
 	//in the directory, then deletes the directory:
 	for(unsigned int i = 0; i < _files.size(); i++)
-		if(! _files[i]->deletef())
-			return false;
+	{
+		if(_files[i]->getName() != "../")
+			if(! _files[i]->deletef())
+				return false;
+	}
 
 	if(rmdir(_path.c_str()) != 0)
 		return false;
