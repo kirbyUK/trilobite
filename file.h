@@ -17,6 +17,7 @@ class File : public DiskItem
 {
 	public:
 		File(const char*);
+		File(File*);
 		~File();
 
 		void calcSize() { }
@@ -26,7 +27,6 @@ class File : public DiskItem
 		bool deletef();
 
 		//Getters:
-		std::string getPath();
 		std::string getName();
 };
 

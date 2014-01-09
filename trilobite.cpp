@@ -11,7 +11,10 @@
 #include <unistd.h>
 
 //Prints the given DiskItem's metadata to the fileinfo window:
-void printMetaData(DiskItem* item);
+void printMetaData(DiskItem*);
+
+//Prints the passed clipboard's data:
+void printClipboard(DiskItem*);
 
 void updateWindows();
 void drawHelp();
@@ -122,7 +125,8 @@ int main(int argc, char* argv[])
 	int input = 0;
 	std::string path = "";
 	unsigned int selection = 0;
-	while(input != 'q')
+	DiskItem* clipboard = NULL;
+	while((char(input) != 'q') && (char(input) != 'Q'))
 	{
 		updateWindows();
 		drawHelp();
@@ -212,6 +216,7 @@ int main(int argc, char* argv[])
 		}
 
 		printMetaData(items[selection + dir->getDotfiles()]);
+		printClipboard(clipboard);
 
 		refresh();
 		wrefresh(fileview.window);
@@ -277,6 +282,57 @@ int main(int argc, char* argv[])
 				messageBox(error);
 			}
 		}
+		else if((char(input) == 'C') || (char(input) == 'c'))
+		{
+			//Checks if we are trying to copy a directory or a file:
+			clipboard = dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]);
+
+			if(clipboard == NULL)
+			{
+				//We are copying a file:
+				clipboard = new File(dynamic_cast <File*>(items[selection + dir->getDotfiles()]));
+			}
+			else
+			{
+				//We are copying a directory:
+				clipboard = new Directory(dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]));
+			}
+		}
+		else if((char(input) == 'X') || (char(input) == 'x'))
+		{
+			//Checks if we are trying to cut a directory or a file:
+			clipboard = dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]);
+
+			if(clipboard == NULL)
+			{
+				//We are cutting a file:
+				clipboard = new File(dynamic_cast <File*>(items[selection + dir->getDotfiles()]));
+			}
+			else
+			{
+				//We are cutting a directory:
+				clipboard = new Directory(dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]));
+			}
+			clipboard->cut();
+		}
+		else if((char(input) == 'P') || (char(input) == 'p'))
+		{
+			if(clipboard != NULL)
+			{
+				if(! clipboard->paste(dir->getPath()))
+				{
+					std::string error = "Could not paste '" + clipboard->getName() + "'";
+					messageBox(error);
+				}
+				else
+				{
+					DiskItem* item = clipboard;
+					dir->getFiles().push_back(item);
+					std::sort(dir->getFiles().begin(), dir->getFiles().end(), byName);
+					clipboard = NULL;
+				}
+			}
+		}
 	}
 
 	delete dir;
@@ -310,6 +366,37 @@ void printMetaData(DiskItem* item)
 	//Print the filesize:
 	if((h > 2) && (item->getName() != "../"))
 		mvwprintw(fileinfo.window, 3, 1, "%s", item->getFormattedSize().c_str());
+}
+
+//Prints the given DiskItem's metadata to the extrainfo window:
+void printClipboard(DiskItem* clipboard)
+{
+	if(clipboard != NULL)
+	{
+		//Gets the size of window, so we know how much we can print:
+		unsigned int h = extrainfo.height - 2;
+	
+		if(h > 0) mvwprintw(extrainfo.window, 1, 1, "%s", "CLIPBOARD:");
+
+		//Print the name:
+		if(h > 1) mvwprintw(extrainfo.window, 2, 1, "%s", clipboard->getName().c_str());
+
+		//Print if it is a file or directory:
+		if(clipboard->getName()[clipboard->getName().size() - 1] == '/')
+		{
+			if(h > 2)
+				mvwprintw(extrainfo.window, 3, 1, "%s", "Directory");
+		}
+		else
+		{
+			if(h > 2)
+				mvwprintw(extrainfo.window, 3, 1, "%s", "File");
+		}
+
+		//Print the filesize:
+		if((h > 3) && (clipboard->getName() != "../"))
+			mvwprintw(extrainfo.window, 4, 1, "%s", clipboard->getFormattedSize().c_str());
+	}
 }
 
 //Updates the window size:

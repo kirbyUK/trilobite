@@ -250,6 +250,9 @@ void Directory::calcSize()
 
 bool Directory::paste(std::string newpath)
 {
+	if(_files.size() == 0)
+		read();
+
 	//Creates a new directory in the new path:
 	std::string path = newpath + getName();
 	if(mkdir(path.c_str(), _attr->st_mode) != 0)
@@ -258,8 +261,9 @@ bool Directory::paste(std::string newpath)
 	//Copies the contents of the directory to
 	//the newly created directory:
 	for(unsigned int i = 0; i < _files.size(); i++)
-		if(! _files[i]->paste(path))
-			return false;
+		if(_files[i]->getName() != "../")
+			if(! _files[i]->paste(path))
+				return false;
 
 	//If the file was set to cut, delete the contents
 	//and then delete the directory:
@@ -272,7 +276,9 @@ bool Directory::paste(std::string newpath)
 
 bool Directory::deletef()
 {
-	read();
+	if(_files.size() == 0)
+		read();
+
 	//Deletes the files and directories contained
 	//in the directory, then deletes the directory:
 	for(unsigned int i = 0; i < _files.size(); i++)

@@ -25,6 +25,18 @@ File::File(const char* path)
 	_isCut = false;
 }
 
+File::File(File* file)
+{
+	_size = file->getSize();
+	_path = file->getPath();
+	_isCut = false;
+
+	//Reads the files into '_attr':
+	_attr = new struct stat;
+	if(stat(_path.c_str(), _attr) != 0)
+		throw errno;
+}
+
 File::~File()
 {
 	//Deletes the stat struct:
