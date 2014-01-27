@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <cerrno>
+#include <cctype>
 #include <unistd.h>
 
 //Prints the given DiskItem's metadata to the fileinfo window:
@@ -19,6 +20,7 @@ void printClipboard(DiskItem*);
 void updateWindows();
 void drawHelp();
 void messageBox(std::string);
+const char* inputBox();
 
 //Takes a directory path, and returns it shrunk to fit the size:
 std::string fitToSize(std::string path, unsigned int size);
@@ -27,7 +29,7 @@ struct windows
 {
 	WINDOW* window;
 	unsigned int x, y, height, width;
-} fileview, fileinfo, extrainfo, messagebox;
+} fileview, fileinfo, extrainfo, messagebox, inputbox;
 
 //The help text at the bottom:
 const std::string HELP_TEXT = " X: Cut C: Copy V: Paste R: Rename D: Delete Q: Quit";
@@ -333,6 +335,19 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
+		else if((char(input) == 'R') || (char(input) == 'r'))
+		{
+			//Get the new name, and attempt to rename the selected item:
+			const char* newName = inputBox();
+			if(newName != NULL)
+			{
+				if(! items[selection + dir->getDotfiles()]->rename(newName))
+				{
+					std::string error = "Cannot rename '" + items[selection + dir->getDotfiles()]->getName() + "'";
+					messageBox(error);
+				}
+			}
+		}
 	}
 
 	delete dir;
@@ -463,7 +478,7 @@ void messageBox(std::string message)
 	unsigned int textX = 3;
 	unsigned int textY = 2;
 
-	//Calculate the poistion of the <OK> 'button':
+	//Calculate the position of the <OK> 'button':
 	unsigned int buttonX = (messagebox.width / 2) - 2;
 	unsigned int buttonY = messagebox.height - 2;
 
@@ -485,6 +500,123 @@ void messageBox(std::string message)
 	//Clear the window:
 	wclear(messagebox.window);
 	clear();
+}
+
+//Creates an input box that allows the user to enter a string and returns it:
+const char* inputBox()
+{
+	init_pair(4, COLOR_WHITE, COLOR_BLUE);
+	init_pair(5, COLOR_WHITE, COLOR_RED);
+	
+	//Resize the input box:
+	inputbox.width = screenX / 2;
+	inputbox.height = screenY / 4;
+	inputbox.x = ((screenX / 2) - (inputbox.width / 2));
+	inputbox.y = ((screenY / 2) - (inputbox.height / 2));
+	inputbox.window = newwin(inputbox.height, inputbox.width, inputbox.y, inputbox.x);
+
+	//Set the background:
+	wbkgd(inputbox.window, COLOR_PAIR(4));
+
+	//The start position of the text entry box:
+	unsigned int boxX = 2;
+	unsigned int boxY = 2;
+	unsigned int boxWidth = inputbox.width - 4;
+	
+	//The position of the buttons:
+	unsigned int button1X = (inputbox.width / 4) - 2;
+	unsigned int button2X = ((inputbox.width / 4) * 3) - 3;
+	unsigned int buttonY = inputbox.height - 2;
+
+	int input = 0, selection = 0;
+	std::string inputStr = "";
+	while(1)
+	{
+		//Colours the text entry box red:
+		mvwchgat(inputbox.window, boxX, boxY, boxWidth, A_NORMAL, 5, NULL);
+
+		//Prints the text the user has entered:
+		wattron(inputbox.window, COLOR_PAIR(5));
+		mvwprintw(inputbox.window, boxY, boxX, "%s", inputStr.c_str());
+		wattroff(inputbox.window, COLOR_PAIR(5));
+
+		//Checks what area is currently selected:
+		switch(selection)
+		{
+			//The text box:
+			case 0: curs_set(1);
+					mvwprintw(inputbox.window, buttonY, button1X, "%s", "<OK>");
+					mvwprintw(inputbox.window, buttonY, button2X, "%s", "<CANCEL>");
+					wmove(inputbox.window, boxY, (boxX + inputStr.size()));
+					break;
+
+			//The '<OK>' button:
+			case 1: curs_set(0);
+					wattron(inputbox.window, COLOR_PAIR(5));
+					mvwprintw(inputbox.window, buttonY, button1X, "%s", "<OK>");
+					wattroff(inputbox.window, COLOR_PAIR(5));
+					mvwprintw(inputbox.window, buttonY, button2X, "%s", "<CANCEL>");
+					break;
+
+			//The '<CANCEL>' button:
+			case 2: curs_set(0);
+					wattron(inputbox.window, COLOR_PAIR(5));
+					mvwprintw(inputbox.window, buttonY, button2X, "%s", "<CANCEL>");
+					wattroff(inputbox.window, COLOR_PAIR(5));
+					mvwprintw(inputbox.window, buttonY, button1X, "%s", "<OK>");
+					break;
+		}
+
+		wrefresh(inputbox.window);
+
+		//Gets the input to check for the Tab key:
+		input = getch();
+
+		if(char(input) == '\t')
+		{
+			switch(selection)
+			{
+				case 0: selection = 1; break;
+				case 1: selection = 2; break;
+				case 2: selection = 0; break;
+				default: selection = 0;
+			}
+		}
+		else if(char(input) == '\n')
+		{
+			switch(selection)
+			{
+				//The user has clicked '<OK>', return the
+				//contents of the text box:
+				case 1: wclear(inputbox.window);
+						if(inputStr.size() == 0) return NULL; else return inputStr.c_str(); 
+						break;
+
+				//The user has clicked '<CANCEL>', return
+				//nothing:
+				case 2: wclear(inputbox.window);
+						return NULL;
+						break;
+			}
+		}
+		else if((input == KEY_BACKSPACE) || (input == KEY_DC))
+		{
+			//If we're editing the input, backspace deletes a character off the end:
+			if((selection == 0) && (inputStr.length() > 0))
+			{
+				inputStr.erase(inputStr.length() - 1);
+
+				//Clear the box and redraw it:
+				wclear(inputbox.window);
+				wbkgd(inputbox.window, COLOR_PAIR(4));
+			}
+		}
+		else
+			//Otherwise, check if the input is an alphanumeric character, and if so,
+			//add it to the end of our input string:
+			if(isalnum(input) && (selection == 0))
+				inputStr += input;
+	}
 }
 
 //Takes a directory path and returns it shrunk to the given size or smaller:
