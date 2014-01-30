@@ -3,8 +3,8 @@ FLAGS=-Wall -c
 LIBS=-lncurses
 SDIR=./
 
-trilobite: trilobite.o file.o directory.o diskItem.o
-	$(CC) $(LIBS) trilobite.o file.o directory.o diskItem.o -o trilobite
+trilobite: trilobite.o diskItem.o file.o directory.o
+	$(CC) $(LIBS) trilobite.o diskItem.o file.o directory.o -o trilobite
 
 trilobite.o: $(SDIR)trilobite.cpp
 	$(CC) $(FLAGS) trilobite.cpp 
@@ -18,6 +18,9 @@ file.o: $(SDIR)file.h $(SDIR)file.cpp
 directory.o: $(SDIR)directory.h $(SDIR)directory.cpp
 	$(CC) $(FLAGS) directory.cpp
 
-.PHONY: clean 
+.PHONY: clean install
 clean:
 	rm *.o
+
+install:
+	cp trilobite /usr/local/bin/
