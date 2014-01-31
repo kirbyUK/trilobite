@@ -1,0 +1,11 @@
+Source: trilobite
+Maintainer: Alex Kerr <kirbyman62@gmail.com>
+Section: misc
+Priority: optional
+Build-Depends: libncurses5-dev
+
+Package: trilobite
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Ncurses filemanager
+ trilobite is an ncurses filemanager with basic functionality
