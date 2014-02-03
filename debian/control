@@ -2,7 +2,8 @@ Source: trilobite
 Maintainer: Alex Kerr <kirbyman62@gmail.com>
 Section: misc
 Priority: optional
-Build-Depends: libncurses5-dev
+Standards-Version: 3.9.5
+Build-Depends: libncurses5-dev, debhelper (>= 9)
 
 Package: trilobite
 Architecture: any
