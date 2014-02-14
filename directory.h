@@ -20,8 +20,10 @@ class Directory : public DiskItem
 		unsigned int _dotfiles;
 
 	public:
-		//Constructor: 
+		//Default constructor, takes a filename:
 		Directory(const char*);
+
+		//Takes a pointer to a directory object, creates a copy:
 		Directory(Directory*);
 
 		//Destructor:
@@ -37,7 +39,7 @@ class Directory : public DiskItem
 		bool paste(std::string);
 		bool deletef();
 
-		//Cleans the path to remove '../':
+		//Cleans the path to remove trailing '../':
 		void cleanPath();
 
 		//Getters:

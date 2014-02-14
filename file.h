@@ -16,8 +16,13 @@
 class File : public DiskItem
 {
 	public:
+		//Defualt constructor, takes a filename:
 		File(const char*);
+
+		//Takes a pointer to a file object, creates a copy:
 		File(File*);
+
+		//Destructor:
 		~File();
 
 		void calcSize() { }

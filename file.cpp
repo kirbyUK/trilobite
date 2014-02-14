@@ -27,11 +27,12 @@ File::File(const char* path)
 
 File::File(File* file)
 {
+	//Copies the passed file's data:
 	_size = file->getSize();
 	_path = file->getPath();
 	_isCut = false;
 
-	//Reads the files into '_attr':
+	//Reads the file's attributes into '_attr':
 	_attr = new struct stat;
 	if(stat(_path.c_str(), _attr) != 0)
 		throw errno;
@@ -43,6 +44,7 @@ File::~File()
 	delete _attr;
 }
 
+//Creates a copy of the file in the passed location:
 bool File::paste(std::string newpath)
 {
 	//Opens an input file:
@@ -56,7 +58,7 @@ bool File::paste(std::string newpath)
 	if((! in) || (! out))
 		return false;
 
-	//Writes the file:
+	//Writes the input file to the output file:
 	out << in.rdbuf();
 
 	//Closes the files:

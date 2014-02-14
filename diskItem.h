@@ -23,7 +23,7 @@ class DiskItem
 		//Virtual destructor:
 		virtual ~DiskItem() { }
 
-		//Needed for the directory:
+		//Calculates the size of a directory:
 		virtual void calcSize() = 0;
 
 		//Operation functions:
@@ -32,11 +32,14 @@ class DiskItem
 		virtual bool deletef() = 0;
 		bool rename(const char*);
 
+		//Returns a string with the filesize and
+		//an appropriate unit:
+		std::string getFormattedSize();
+
 		//Getters:
 		std::string getPath();
 		virtual std::string getName() = 0;
 		unsigned int getSize();
-		std::string getFormattedSize();
 };
 
 //Checks the names of the two items passed,

@@ -1,3 +1,4 @@
+// --- trilobite.cpp
 #include "diskItem.h"
 #include "directory.h"
 #include "file.h"
@@ -17,14 +18,23 @@ void printMetaData(DiskItem*);
 //Prints the passed clipboard's data:
 void printClipboard(DiskItem*);
 
+//Redraws all the windows:
 void updateWindows();
+
+//Draws the help text:
 void drawHelp();
+
+//Creates a message box with the passed error:
 void messageBox(std::string);
+
+//Creates an input box, allowing the user to enter
+//text, which is returned:
 const char* inputBox();
 
 //Takes a directory path, and returns it shrunk to fit the size:
 std::string fitToSize(std::string path, unsigned int size);
 
+//The various windows used by the program:
 struct windows
 {
 	WINDOW* window;
@@ -45,7 +55,7 @@ int main(int argc, char* argv[])
 	//Checks if too many arguments have been given:
 	if(argc > 2)
 	{
-		std::cerr << "Please specify a directory.\n";
+		std::cerr << "Please specify a single directory.\n";
 		return -1;
 	}
 	//Otherwise, sees if a directory has been given,
@@ -57,6 +67,7 @@ int main(int argc, char* argv[])
 		{
 			dir = new Directory(argv[1]);
 		}
+		//Give an error message and quit if it fails:
 		catch(int e)
 		{
 			std::cerr << "Cannot open '" << argv[1] << "': ";
@@ -74,11 +85,15 @@ int main(int argc, char* argv[])
 	//the user's current working directory:
 	else
 	{
+		//Get the current working directory:
 		char* cwd = get_current_dir_name();
+
+		//Attempt to open it:
 		try
 		{
 			dir = new Directory(cwd);
 		}
+		//Give an error message and quit if it fails:
 		catch(int e)
 		{
 			std::cerr << "Cannot open '" << cwd << "': ";
@@ -92,10 +107,12 @@ int main(int argc, char* argv[])
 			return -1;
 		}
 	}
+	//Attempt to read the directory's contents:
 	try
 	{
 		dir->read();
 	}
+	//Give an error message and quit if it fails:
 	catch(int e)
 	{
 		std::cerr << "Cannot open '" << dir->getPath() << "': ";
@@ -114,13 +131,16 @@ int main(int argc, char* argv[])
 
 	//The colour pairs:
 	init_pair(2, COLOR_WHITE, COLOR_RED);
-	//Allows use of the up and down arrows:
+	//Enable keypad mode (allows use of the up and down arrows):
 	keypad(stdscr, true);
 
+	//Start using colour:
 	start_color();
+
+	//Update the screen:
 	refresh();
 
-	//Hides the cursor:
+	//Hides the cursor, set 'noecho()':
 	curs_set(0);
 	noecho();
 
@@ -128,8 +148,11 @@ int main(int argc, char* argv[])
 	std::string path = "";
 	unsigned int selection = 0;
 	DiskItem* clipboard = NULL;
+
+	//While the user has not quit:
 	while((char(input) != 'q') && (char(input) != 'Q'))
 	{
+		//Redraw the windows and help:
 		updateWindows();
 		drawHelp();
 
@@ -137,7 +160,7 @@ int main(int argc, char* argv[])
 		if(dir->getName() == "../")
 			dir->cleanPath();
 
-		//If nessecary, resizes the directory path:
+		//If necessary, resizes the directory path:
 		path = "";
 		if(dir->getPath().length() >= screenX)
 			path = fitToSize(dir->getPath(), (screenX - 2));
@@ -217,9 +240,13 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		//Print the selected file's metadata to the 'fileinfo' window:
 		printMetaData(items[selection + dir->getDotfiles()]);
+
+		//Print the contents of the clipboard to the 'extrainfo' window:
 		printClipboard(clipboard);
 
+		//Refresh the screen and windows:
 		refresh();
 		wrefresh(fileview.window);
 		wrefresh(fileinfo.window);
@@ -257,6 +284,7 @@ int main(int argc, char* argv[])
 
 					clear();
 				}
+				//If an error occurs, inform the user with a message box:
 				catch(int e)
 				{
 					std::string error = "Cannot open '" + dir->getPath() + "' ";
@@ -270,20 +298,24 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
+		//Otherwise, if the user has pressed 'd' for delete:
 		else if((char(input) == 'd') || (char(input) == 'D'))
 		{
 			DiskItem* selected = items[selection + dir->getDotfiles()];
+			//Attempt to delete the selected item:
 			if(selected->deletef())
 			{
 				delete selected;
 				dir->getFiles().erase(dir->getFiles().begin() + (selection + dir->getDotfiles()));
 			}
+			//If an error occurs, inform the user with a message box:
 			else
 			{
 				std::string error = "Could not delete '" + selected->getPath() + "'";
 				messageBox(error);
 			}
 		}
+		//Otherwise, if the user has pressed 'c' for copy:
 		else if((char(input) == 'C') || (char(input) == 'c'))
 		{
 			//Checks if we are trying to copy a directory or a file:
@@ -300,6 +332,7 @@ int main(int argc, char* argv[])
 				clipboard = new Directory(dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]));
 			}
 		}
+		//Otherwise, if the user has pressed 'x' for cut:
 		else if((char(input) == 'X') || (char(input) == 'x'))
 		{
 			//Checks if we are trying to cut a directory or a file:
@@ -317,24 +350,31 @@ int main(int argc, char* argv[])
 			}
 			clipboard->cut();
 		}
+		//Otherwise, if the user has pressed 'p' for paste:
 		else if((char(input) == 'P') || (char(input) == 'p'))
 		{
 			if(clipboard != NULL)
 			{
+				//Attempt to paste the item in the clipboard:
 				if(! clipboard->paste(dir->getPath()))
 				{
+					//If an error occurs, inform the user with a message box:
 					std::string error = "Could not paste '" + clipboard->getName() + "'";
 					messageBox(error);
 				}
 				else
 				{
+					//If it works fine, add the new item to the directory's list of items:
 					DiskItem* item = clipboard;
 					dir->getFiles().push_back(item);
 					std::sort(dir->getFiles().begin(), dir->getFiles().end(), byName);
+
+					//Empty the clipboard:
 					clipboard = NULL;
 				}
 			}
 		}
+		//Otherwise, if the user presses 'r' for rename:
 		else if((char(input) == 'R') || (char(input) == 'r'))
 		{
 			//Get the new name, and attempt to rename the selected item:
@@ -343,6 +383,7 @@ int main(int argc, char* argv[])
 			{
 				if(! items[selection + dir->getDotfiles()]->rename(newName))
 				{
+					//If an error occurs, inform the user with a message box:
 					std::string error = "Cannot rename '" + items[selection + dir->getDotfiles()]->getName() + "'";
 					messageBox(error);
 				}
@@ -350,6 +391,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	//Delete the directory object:
 	delete dir;
 
 	//Close ncurses:
@@ -386,11 +428,13 @@ void printMetaData(DiskItem* item)
 //Prints the given DiskItem's metadata to the extrainfo window:
 void printClipboard(DiskItem* clipboard)
 {
+	//Check the clipboard isn't empty:
 	if(clipboard != NULL)
 	{
 		//Gets the size of window, so we know how much we can print:
 		unsigned int h = extrainfo.height - 2;
 	
+		//Print the title:
 		if(h > 0) mvwprintw(extrainfo.window, 1, 1, "%s", "CLIPBOARD:");
 
 		//Print the name:
@@ -440,10 +484,12 @@ void updateWindows()
 	extrainfo.width = fileinfo.width;
 	extrainfo.height = (screenY - fileinfo.height) - 2;
 
+	//Creates new window objects with the new values:
 	fileview.window = newwin(fileview.height, fileview.width, fileview.y, fileview.x);
 	fileinfo.window = newwin(fileinfo.height, fileinfo.width, fileinfo.y, fileinfo.x);
 	extrainfo.window = newwin(extrainfo.height, extrainfo.width, extrainfo.y, extrainfo.x);
 
+	//Creates a border around each of the windows:
 	wborder(fileview.window, '|', '|', '-', '-', '+', '+', '+', '+');
 	wborder(fileinfo.window, '|', '|', '-', '-', '+', '+', '+', '+');
 	wborder(extrainfo.window, '|', '|', '-', '-', '+', '+', '+', '+');
@@ -452,7 +498,10 @@ void updateWindows()
 //Draws the help text:
 void drawHelp()
 {
+	//Initialise the colour pair:
 	init_pair(1, COLOR_WHITE, COLOR_BLUE);
+
+	//Turn said pair on, and write the help text, then turn it off:
 	attron(COLOR_PAIR(1));
 	mvprintw((screenY - 1), 0, "%s", HELP_TEXT.c_str());
 	attroff(COLOR_PAIR(1));
@@ -461,6 +510,7 @@ void drawHelp()
 //Creates a message box with the given message and keeps it on screen:
 void messageBox(std::string message)
 {
+	//Initialise the two colour pairs:
 	init_pair(4, COLOR_WHITE, COLOR_BLUE);
 	init_pair(5, COLOR_WHITE, COLOR_RED);
 
@@ -471,7 +521,7 @@ void messageBox(std::string message)
 	messagebox.y = ((screenY / 2) - (messagebox.height / 2));
 	messagebox.window = newwin(messagebox.height, messagebox.width, messagebox.y, messagebox.x);
 
-	//Set the background:
+	//Set the background colour:
 	wbkgd(messagebox.window, COLOR_PAIR(4));
 
 	//Calculate the position of the text:
@@ -490,9 +540,11 @@ void messageBox(std::string message)
 	mvwprintw(messagebox.window, buttonY, buttonX, "%s", "<OK>");
 	wattroff(messagebox.window, COLOR_PAIR(5));
 
+	//Refresh the screen and the messagebox:
 	refresh();
 	wrefresh(messagebox.window);
 
+	//Continuously get input, until the user presses the 'Enter' key:
 	int input = 0;
 	while(char(input) != '\n')
 		input = getch();	
@@ -505,6 +557,7 @@ void messageBox(std::string message)
 //Creates an input box that allows the user to enter a string and returns it:
 const char* inputBox()
 {
+	//Initialises the colour pairs:
 	init_pair(4, COLOR_WHITE, COLOR_BLUE);
 	init_pair(5, COLOR_WHITE, COLOR_RED);
 	
@@ -530,6 +583,9 @@ const char* inputBox()
 
 	int input = 0, selection = 0;
 	std::string inputStr = "";
+
+	//The loop is indefinite, and ends when the user
+	//presses '<OK>' or '<CANCEL>':
 	while(1)
 	{
 		//Colours the text entry box red:
@@ -540,7 +596,7 @@ const char* inputBox()
 		mvwprintw(inputbox.window, boxY, boxX, "%s", inputStr.c_str());
 		wattroff(inputbox.window, COLOR_PAIR(5));
 
-		//Checks what area is currently selected:
+		//Checks and highlights what area is currently selected:
 		switch(selection)
 		{
 			//The text box:
@@ -567,11 +623,13 @@ const char* inputBox()
 					break;
 		}
 
+		//Refreshes the inputbox:
 		wrefresh(inputbox.window);
 
 		//Gets the input to check for the Tab key:
 		input = getch();
 
+		//If the input is tab, change the selection:
 		if(char(input) == '\t')
 		{
 			switch(selection)
@@ -582,6 +640,8 @@ const char* inputBox()
 				default: selection = 0;
 			}
 		}
+		//If the input is Enter, close the box and
+		//return a value based on the selection:
 		else if(char(input) == '\n')
 		{
 			switch(selection)
@@ -599,6 +659,7 @@ const char* inputBox()
 						break;
 			}
 		}
+		//If the user has pressed backspace, attempt to delete some of the input:
 		else if((input == KEY_BACKSPACE) || (input == KEY_DC))
 		{
 			//If we're editing the input, backspace deletes a character off the end:

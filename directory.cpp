@@ -1,3 +1,4 @@
+// --- directory.cpp
 #include "directory.h"
 #include "file.h"
 #include <cerrno>
@@ -33,6 +34,7 @@ Directory::Directory(const char* path)
 //Makes a copy of the passed DiskItem:
 Directory::Directory(Directory* dir)
 {
+	//Copies the passed directory's data:
 	_size = dir->getSize();
 	_path = dir->getPath();
 	_files = dir->getFiles();
@@ -51,7 +53,7 @@ Directory::~Directory()
 	for(unsigned int i = 0; i < _files.size(); i++)
 		delete _files[i];
 
-	//Deletes the directory attributes:
+	//Deletes the struct stat:
 	delete _attr;
 }
 
@@ -69,6 +71,7 @@ void Directory::read()
 	//While there is stuff to read:
 	while(dir_contents != 0)
 	{
+		//Get the name of the next item:
 		std::string name = dir_contents->d_name;
 
 		//Checks we are not reading ".":
@@ -79,7 +82,7 @@ void Directory::read()
 			continue;
 		}
 
-		//The full path of the file:
+		//Construct the full path of the item:
 		std::string filepath = _path + name;
 
 		DiskItem* file = NULL;
@@ -96,14 +99,18 @@ void Directory::read()
 			continue;
 		}
 
+		//If it is a directory:
 		if(S_ISDIR(attr->st_mode) != 0)
 		{
 			//Attempt to open the directory:
 			try
 			{
 				file = new Directory(filepath.c_str());	
+
+				//Attempt to calculate it's size:
 				file->calcSize();
 			}
+			//If an error occurs:
 			catch(int e)
 			{
 				//Delete the 'struct stat':
@@ -114,6 +121,7 @@ void Directory::read()
 				continue;
 			}
 		}
+		//Otherwise, it is a file:
 		else
 		{
 			//Attempt to open the file:
@@ -121,6 +129,7 @@ void Directory::read()
 			{
 				file = new File(filepath.c_str());
 			}
+			//If an error occurs:
 			catch(int e)
 			{
 				//Delete the 'struct stat':
@@ -143,6 +152,7 @@ void Directory::read()
 	//Close the directory:
 	closedir(dir);
 
+	//Sort the items:
 	std::sort(_files.begin(), _files.end(), byName);
 
 	//Count the dotfiles:
@@ -156,6 +166,8 @@ void Directory::read()
 	{
 		DiskItem* parent = NULL;
 		std::string path = _path + "../";
+
+		//Attempt to create an object for the parent:
 		try
 		{
 			parent = new Directory(path.c_str());
@@ -164,6 +176,9 @@ void Directory::read()
 		{
 			throw e;
 		}
+
+		//Insert the link to the parent before any items but
+		//after any dotfiles, so it is at the top of the items:
 		_files.insert(_files.begin() + _dotfiles, parent);
 	}
 }
@@ -171,6 +186,7 @@ void Directory::read()
 //Calculates the size of a directory:
 void Directory::calcSize()
 {
+	//Get the base size of the directory:
 	_size = _attr->st_size;
 
 	//Creates a pointer to a 'DIR' struct:
@@ -184,6 +200,7 @@ void Directory::calcSize()
 	//While there is stuff to read:
 	while(dir_contents != 0)
 	{
+		//Get the name of the next item:
 		std::string name = dir_contents->d_name;
 
 		//Checks we are not reading ".":
@@ -211,12 +228,15 @@ void Directory::calcSize()
 		
 		DiskItem* file = NULL;
 
+		//If it is a directory:
 		if(S_ISDIR(attr->st_mode) != 0)
 		{
 			//Attempt to open the directory:
 			try
 			{
 				file = new Directory(filepath.c_str());	
+
+				//Attempt to calculate the size:
 				file->calcSize();
 			}
 			catch(int e)
@@ -240,7 +260,10 @@ void Directory::calcSize()
 			//Get the file's size:
 			_size += file->getSize();
 		}
+		//Read the next item:
 		dir_contents = readdir(dir);
+
+		//Delete the struct stat and the current object:
 		delete attr;
 		delete file;
 	}
@@ -250,6 +273,8 @@ void Directory::calcSize()
 
 bool Directory::paste(std::string newpath)
 {
+	//If we have not read the directory's contents
+	//previously, read them now:
 	if(_files.size() == 0)
 		read();
 
@@ -276,11 +301,13 @@ bool Directory::paste(std::string newpath)
 
 bool Directory::deletef()
 {
+	//If we have not read the directory's contents
+	//previously, read them now:
 	if(_files.size() == 0)
 		read();
 
 	//Deletes the files and directories contained
-	//in the directory, then deletes the directory:
+	//in the directory:
 	for(unsigned int i = 0; i < _files.size(); i++)
 	{
 		if(_files[i]->getName() != "../")
@@ -288,6 +315,7 @@ bool Directory::deletef()
 				return false;
 	}
 
+	//Deletes the now empty directory:
 	if(rmdir(_path.c_str()) != 0)
 		return false;
 
@@ -307,6 +335,7 @@ void Directory::cleanPath()
 	//Using that, find the 3rd to last '/':
 	int pos2 = _path.find_last_of('/', (pos1 - 1));
 
+	//Make the remove the last item in the '_path' variable:
 	_path = _path.substr(0, (pos2 + 1));
 }
 
@@ -321,11 +350,13 @@ std::string Directory::getName()
 	return _path.substr(pos + 1);
 }
 
+//Returns the list of files and directories:
 std::vector <DiskItem*>& Directory::getFiles()
 {
 	return _files;
 }
 
+//Returns the number of dotfiles in this directory:
 unsigned int Directory::getDotfiles()
 {
 	return _dotfiles;
