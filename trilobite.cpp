@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 	//Checks if too many arguments have been given:
 	if(argc > 2)
 	{
-		std::cerr << "Please specify a single directory.\n";
+		std::cerr << "Please pass a single, valid directory\n";
 		return -1;
 	}
 	//Otherwise, sees if a directory has been given,
