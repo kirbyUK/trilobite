@@ -649,12 +649,14 @@ const char* inputBox()
 				//The user has clicked '<OK>', return the
 				//contents of the text box:
 				case 1: wclear(inputbox.window);
+						wrefresh(inputbox.window);
 						if(inputStr.size() == 0) return NULL; else return inputStr.c_str(); 
 						break;
 
 				//The user has clicked '<CANCEL>', return
 				//nothing:
 				case 2: wclear(inputbox.window);
+						wrefresh(inputbox.window);
 						return NULL;
 						break;
 			}
