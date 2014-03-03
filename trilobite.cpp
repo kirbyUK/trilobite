@@ -29,7 +29,7 @@ void messageBox(std::string);
 
 //Creates an input box, allowing the user to enter
 //text, which is returned:
-const char* inputBox();
+std::string inputBox();
 
 //Takes a directory path, and returns it shrunk to fit the size:
 std::string fitToSize(std::string path, unsigned int size);
@@ -378,10 +378,14 @@ int main(int argc, char* argv[])
 		else if((char(input) == 'R') || (char(input) == 'r'))
 		{
 			//Get the new name, and attempt to rename the selected item:
-			const char* newName = inputBox();
-			if(newName != NULL)
+			std::string newName = inputBox();
+			if(newName != "")
 			{
-				if(! items[selection + dir->getDotfiles()]->rename(newName))
+				//Check if we are renaming a directory:
+				if(dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]) != NULL)
+					newName += '/';
+
+				if(! items[selection + dir->getDotfiles()]->rename(newName.c_str()))
 				{
 					//If an error occurs, inform the user with a message box:
 					std::string error = "Cannot rename '" + items[selection + dir->getDotfiles()]->getName() + "'";
@@ -555,7 +559,7 @@ void messageBox(std::string message)
 }
 
 //Creates an input box that allows the user to enter a string and returns it:
-const char* inputBox()
+std::string inputBox()
 {
 	//Initialises the colour pairs:
 	init_pair(4, COLOR_WHITE, COLOR_BLUE);
@@ -650,14 +654,14 @@ const char* inputBox()
 				//contents of the text box:
 				case 1: wclear(inputbox.window);
 						wrefresh(inputbox.window);
-						if(inputStr.size() == 0) return NULL; else return inputStr.c_str(); 
+						if(inputStr.size() == 0) return NULL; else return inputStr; 
 						break;
 
 				//The user has clicked '<CANCEL>', return
 				//nothing:
 				case 2: wclear(inputbox.window);
 						wrefresh(inputbox.window);
-						return NULL;
+						return "";
 						break;
 			}
 		}
