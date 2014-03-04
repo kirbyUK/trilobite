@@ -256,11 +256,11 @@ int main(int argc, char* argv[])
 		input = getch();
 
 		//Moves the selection up or down if those keys were pressed:
-		switch(input)
-		{
-			case KEY_UP: 	if(selection > 0) selection--; break;
-			case KEY_DOWN: 	if(selection < ((items.size() - dir->getDotfiles()) - 1)) selection++; break;
-		}
+		if((input == KEY_UP) || (char(input) == 'k') || (char(input) == 'K'))
+			if(selection > 0) selection--;
+		if((input == KEY_DOWN) || (char(input) == 'j') || (char(input) == 'J'))
+			if(selection < ((items.size() - dir->getDotfiles()) - 1)) selection++;
+
 		//If the user has pressed Enter:
 		if(char(input) == '\n')
 		{
