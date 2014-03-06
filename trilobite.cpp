@@ -34,6 +34,9 @@ std::string inputBox();
 //Takes a directory path, and returns it shrunk to fit the size:
 std::string fitToSize(std::string path, unsigned int size);
 
+//Checks if the given character is allowed in a filename:
+bool isValidInput(char c);
+
 //The various windows used by the program:
 struct windows
 {
@@ -681,7 +684,7 @@ std::string inputBox()
 		else
 			//Otherwise, check if the input is an alphanumeric character, and if so,
 			//add it to the end of our input string:
-			if(isalnum(input) && (selection == 0))
+			if(isValidInput(input) && (selection == 0))
 				inputStr += input;
 	}
 }
@@ -711,4 +714,12 @@ std::string fitToSize(std::string path, unsigned int size)
 		pos = newPos - removed;
 	}
 	return path;
+}
+
+bool isValidInput(char c)
+{
+	if((isalnum(c)) || (c == '.') || (c == '-') || (c == '_'))
+		return true;
+
+	return false;
 }
