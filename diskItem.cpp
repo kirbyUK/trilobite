@@ -14,16 +14,15 @@ void DiskItem::cut()
 bool DiskItem::rename(const char* newname)
 {
 	std::string newname2 = newname;
+
+	std::string name = getName();
+	std::string newPath = (_path.substr(0, (_path.length() - name.length()))) + newname2;
+
 	//Renames the file to 'newname', if it cannot, returns false:
-	if(std::rename(_path.c_str(), newname) != 0)
+	if(std::rename(_path.c_str(), newPath.c_str()) != 0)
 		return false;
 
-	//Updates the '_path' member:
-	std::string name = getName();
-
-	//Constructs the new path name by removing the old name
-	//and replacing it with the passed name:
-	_path = (_path.substr(0, (_path.length() - name.length()))) + newname2;
+	_path = newPath; 
 
 	return true;
 }
