@@ -40,6 +40,9 @@ Directory::Directory(Directory* dir)
 	_files = dir->getFiles();
 	_isCut = false;
 
+	if(getName() == "../")
+		cleanPath();
+
 	//Reads the directory's attributes into '_attr':
 	_attr = new struct stat;
 	if(stat(_path.c_str(), _attr) != 0)
@@ -328,7 +331,6 @@ bool Directory::deletef()
 //at the end before it is used:
 void Directory::cleanPath()
 {
-
 	//Finds the 2nd to last '/':
 	int pos1 = _path.find_last_of('/', (_path.size() - 2));
 

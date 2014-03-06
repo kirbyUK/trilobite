@@ -129,6 +129,9 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	if(dir->getName() == "../")
+		dir->cleanPath();
+
 	//Initialise ncurses:
 	initscr();
 
@@ -160,8 +163,8 @@ int main(int argc, char* argv[])
 		drawHelp();
 
 		//Cleans the path is nessecary:
-		if(dir->getName() == "../")
-			dir->cleanPath();
+//		if(dir->getName() == "../")
+//			dir->cleanPath();
 
 		//If necessary, resizes the directory path:
 		path = "";
