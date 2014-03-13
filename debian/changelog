@@ -5,7 +5,7 @@ trilobite (0.3-1) UNRELEASED; urgency=medium
   * Fixed issue where renaming files moved them
   * Fixed issue with bar becoming cluttered
 
- -- Alex Kerr <alex@Earl-Grey.MSHOME>  Fri, 06 Mar 2014 19:04:00 +0000
+ -- Alex Kerr <alex@Earl-Grey.MSHOME>  Thu, 06 Mar 2014 19:04:00 +0000
 
 trilobite (0.2-1) UNRELEASED; urgency=medium
 
