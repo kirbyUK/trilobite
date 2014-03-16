@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		//Get the current working directory:
-		char* cwd = get_current_dir_name();
+		char* cwd = getcwd(NULL, 0);
 
 		//Attempt to open it:
 		try
