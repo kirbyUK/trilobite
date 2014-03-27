@@ -162,10 +162,6 @@ int main(int argc, char* argv[])
 		updateWindows();
 		drawHelp();
 
-		//Cleans the path is nessecary:
-//		if(dir->getName() == "../")
-//			dir->cleanPath();
-
 		//If necessary, resizes the directory path:
 		path = "";
 		if(dir->getPath().length() >= screenX)
