@@ -313,6 +313,11 @@ int main(int argc, char* argv[])
 			{
 				delete selected;
 				dir->getFiles().erase(dir->getFiles().begin() + (selection + dir->getDotfiles()));
+
+				//If we deleted the last item, then 'selection + dir->getDotfiles()' will
+				//go out of bounds on the 'item' array, so decrement selection:
+				if((selection + dir->getDotfiles()) == dir->getFiles().size())
+					selection--;
 			}
 			//If an error occurs, inform the user with a message box:
 			else
