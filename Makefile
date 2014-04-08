@@ -21,7 +21,7 @@ directory.o: $(SDIR)directory.h $(SDIR)directory.cpp
 
 .PHONY: install clean
 install:
-	cp trilobite $(DESTDIR)
+	install -m 0755 trilobite $(DESTDIR)
 
 clean:
 	rm *.o
