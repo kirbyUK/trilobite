@@ -1,8 +1,10 @@
 CC=g++
 FLAGS=-Wall -c
 LIBS=-lncurses
-SDIR=./
-DESTDIR=/usr/local/bin/
+SDIR=.
+DESTDIR=/usr/local
+
+all: trilobite
 
 trilobite: trilobite.o diskItem.o file.o directory.o
 	$(CC) $(LIBS) trilobite.o diskItem.o file.o directory.o -o trilobite
@@ -19,9 +21,13 @@ file.o: $(SDIR)file.h $(SDIR)file.cpp
 directory.o: $(SDIR)directory.h $(SDIR)directory.cpp
 	$(CC) $(FLAGS) directory.cpp
 
-.PHONY: install clean
+deinstall: uninstall
+uninstall:
+	rm $(DESTDIR)/bin/trilobite
+
 install:
-	install -m 0755 trilobite $(DESTDIR)
+	install -m 0755 trilobite $(DESTDIR)/bin/
 
 clean:
 	rm *.o
+	rm trilobite
