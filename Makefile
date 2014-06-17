@@ -1,7 +1,6 @@
 CC=g++
 FLAGS=-Wall -c
 LIBS=-lncurses
-SDIR=.
 DESTDIR=/usr/local
 
 all: trilobite
@@ -9,16 +8,16 @@ all: trilobite
 trilobite: trilobite.o diskItem.o file.o directory.o
 	$(CC) $(LIBS) trilobite.o diskItem.o file.o directory.o -o trilobite
 
-trilobite.o: $(SDIR)trilobite.cpp
+trilobite.o: trilobite.cpp
 	$(CC) $(FLAGS) trilobite.cpp 
 
-diskItem.o: $(SDIR)diskItem.h $(SDIR)diskItem.cpp
+diskItem.o: diskItem.h diskItem.cpp
 	$(CC) $(FLAGS) diskItem.cpp
 
-file.o: $(SDIR)file.h $(SDIR)file.cpp 
+file.o: file.h file.cpp 
 	$(CC) $(FLAGS) file.cpp
 
-directory.o: $(SDIR)directory.h $(SDIR)directory.cpp
+directory.o: directory.h directory.cpp
 	$(CC) $(FLAGS) directory.cpp
 
 deinstall: uninstall
