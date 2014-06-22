@@ -12,6 +12,8 @@
 #include <cctype>
 #include <unistd.h>
 
+const short COLOUR = COLOR_BLUE; 
+
 //Prints the given DiskItem's metadata to the fileinfo window:
 void printMetaData(DiskItem*);
 
@@ -325,37 +327,43 @@ int main(int argc, char* argv[])
 		//Otherwise, if the user has pressed 'c' for copy:
 		else if((char(input) == 'C') || (char(input) == 'c'))
 		{
-			//Checks if we are trying to copy a directory or a file:
-			clipboard = dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]);
+			if(items[selection + dir->getDotfiles()]->getName() != "../")
+			{
+				//Checks if we are trying to copy a directory or a file:
+				clipboard = dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]);
 
-			if(clipboard == NULL)
-			{
-				//We are copying a file:
-				clipboard = new File(dynamic_cast <File*>(items[selection + dir->getDotfiles()]));
-			}
-			else
-			{
-				//We are copying a directory:
-				clipboard = new Directory(dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]));
+				if(clipboard == NULL)
+				{
+					//We are copying a file:
+					clipboard = new File(dynamic_cast <File*>(items[selection + dir->getDotfiles()]));
+				}
+				else
+				{
+					//We are copying a directory:
+					clipboard = new Directory(dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]));
+				}
 			}
 		}
 		//Otherwise, if the user has pressed 'x' for cut:
 		else if((char(input) == 'X') || (char(input) == 'x'))
 		{
-			//Checks if we are trying to cut a directory or a file:
-			clipboard = dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]);
+			if(items[selection + dir->getDotfiles()]->getName() != "../")
+			{
+				//Checks if we are trying to cut a directory or a file:
+				clipboard = dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]);
 
-			if(clipboard == NULL)
-			{
-				//We are cutting a file:
-				clipboard = new File(dynamic_cast <File*>(items[selection + dir->getDotfiles()]));
+				if(clipboard == NULL)
+				{
+					//We are cutting a file:
+					clipboard = new File(dynamic_cast <File*>(items[selection + dir->getDotfiles()]));
+				}
+				else
+				{
+					//We are cutting a directory:
+					clipboard = new Directory(dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]));
+				}
+				clipboard->cut();
 			}
-			else
-			{
-				//We are cutting a directory:
-				clipboard = new Directory(dynamic_cast <Directory*>(items[selection + dir->getDotfiles()]));
-			}
-			clipboard->cut();
 		}
 		//Otherwise, if the user has pressed 'p' for paste:
 		else if((char(input) == 'P') || (char(input) == 'p'))
@@ -510,7 +518,7 @@ void updateWindows()
 void drawHelp()
 {
 	//Initialise the colour pair:
-	init_pair(1, COLOR_WHITE, COLOR_BLUE);
+	init_pair(1, COLOR_WHITE, COLOUR);
 
 	//Turn said pair on, and write the help text, then turn it off:
 	attron(COLOR_PAIR(1));
@@ -522,7 +530,7 @@ void drawHelp()
 void messageBox(std::string message)
 {
 	//Initialise the two colour pairs:
-	init_pair(4, COLOR_WHITE, COLOR_BLUE);
+	init_pair(4, COLOR_WHITE, COLOUR);
 	init_pair(5, COLOR_WHITE, COLOR_RED);
 
 	//Resize the message box:
@@ -569,7 +577,7 @@ void messageBox(std::string message)
 std::string inputBox()
 {
 	//Initialises the colour pairs:
-	init_pair(4, COLOR_WHITE, COLOR_BLUE);
+	init_pair(4, COLOR_WHITE, COLOUR);
 	init_pair(5, COLOR_WHITE, COLOR_RED);
 	
 	//Resize the input box:
