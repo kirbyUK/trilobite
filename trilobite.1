@@ -1,0 +1,70 @@
+.TH trilobite 1 "Jun 23, 2014" "" ""
+
+.SH NAME
+trilobite - A simple curses filemanager
+
+.SH SYNOPSIS
+\fBtrilobite\fR [\fBDIR\fR]
+
+.SH DESCRIPTION
+trilobite is a simple curses filemanager. It contains basic functionality such 
+as the abilitiy to cut/copy and paste, rename and delete files and directories.
+
+.SH USAGE
+.SS Naviagtion
+.TP
+.B Up/down arrow keys
+Used to naviagate up and down through the list of files and directories. The
+Vim-like keybindings K and J can also be used for up and down respectively.
+.TP
+.B Enter key
+When a directory is selected, pressing enter will change the current working
+directory to the selected one.
+.TP
+.B Q
+Quits the program.
+.SS File/directory operations
+.TP
+.B C
+Copies the selected file/directory to the clipboard. It's details will appear
+in the clipboard window to the bottom-right.
+.TP
+.B X
+Cuts the selected file/directory to the clipboard. It's details will appear in
+the clipboard window to the bottom-right. This is the same as copying, however
+after the file/directory is pasted to a new location, the original is deleted.
+.TP
+.B P
+If there is a file/directory in the clipboard, paste it and it's contents to
+the current working directory, and if successful removes it from the clipboard.
+.TP
+.B R
+Gives the user an input box (see Input Box section) to give a new name to the
+selected file/directory. The selected file/directory will be renamed to the
+given name.
+.TP
+.B D
+Deletes the selected file/directory. There is no confirmation or warning, so be
+careful!
+.SS Input Box
+.TP
+.B Tab
+Switches through the available selections - the text entry box, and the two
+buttons.
+.TP
+.B Enter
+When pressed while a button is selected, 'presses' the button.
+.TP
+.B <OK> button
+Renames the selected file/directory to the text given in the text entry box.
+.TP
+.B <CANCEL> button
+Closes the text entry window without making any changes.
+
+.SH SEE ALSO
+.B mv(1)
+.B cp(1)
+.B rm(1)
+
+.SH AUTHOR
+Alex Kerr <kirbyman62@gmail.com>.

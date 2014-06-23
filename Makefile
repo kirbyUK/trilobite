@@ -23,9 +23,11 @@ directory.o: directory.h directory.cpp
 deinstall: uninstall
 uninstall:
 	rm $(DESTDIR)/bin/trilobite
+	rm $(DESTDIR)/share/man/man1/trilobite.1
 
 install:
 	install -m 0755 trilobite $(DESTDIR)/bin/
+	install -m 0644 trilobite.1 $(DESTDIR)/share/man/man1/
 
 clean:
 	rm *.o
