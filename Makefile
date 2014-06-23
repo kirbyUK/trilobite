@@ -26,7 +26,9 @@ uninstall:
 	rm $(DESTDIR)/share/man/man1/trilobite.1
 
 install:
+	test -d $(DESTDIR)/bin || mkdir -p $(DESDIR)/bin
 	install -m 0755 trilobite $(DESTDIR)/bin/
+	test -d $(DESTDIR)/share/man/man1 || mkdir -p $(DESDIR)/share/man/man1
 	install -m 0644 trilobite.1 $(DESTDIR)/share/man/man1/
 
 clean:
