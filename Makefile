@@ -2,11 +2,13 @@ CC=g++
 FLAGS=-Wall -c
 LIBS=-lncurses
 DESTDIR=/usr/local
+BIN=trilobite
+OBJ=trilobite.o diskItem.o file.o directory.o
 
-all: trilobite
+all: $(BIN)
 
-trilobite: trilobite.o diskItem.o file.o directory.o
-	$(CC) $(LIBS) trilobite.o diskItem.o file.o directory.o -o trilobite
+$(BIN): $(OBJ)
+	$(CC) $(LIBS) $(OBJ) -o $(BIN)
 
 trilobite.o: trilobite.cpp
 	$(CC) $(FLAGS) trilobite.cpp 
@@ -22,15 +24,15 @@ directory.o: directory.h directory.cpp
 
 deinstall: uninstall
 uninstall:
-	rm $(DESTDIR)/bin/trilobite
-	rm $(DESTDIR)/share/man/man1/trilobite.1
+	rm $(DESTDIR)/bin/$(BIN)
+	rm $(DESTDIR)/share/man/man1/$(BIN).1
 
 install:
-	test -d $(DESTDIR)/bin || mkdir -p $(DESDIR)/bin
-	install -m 0755 trilobite $(DESTDIR)/bin/
-	test -d $(DESTDIR)/share/man/man1 || mkdir -p $(DESDIR)/share/man/man1
-	install -m 0644 trilobite.1 $(DESTDIR)/share/man/man1/
+	if [ ! -d $(DESTDIR)/bin ]; then mkdir $(DESTDIR)/bin; fi
+	install -m 0755 $(BIN) $(DESTDIR)/bin/
+	if [ ! -d $(DESTDIR)/share/man/man1 ]; then mkdir -p $(DESTDIR)/share/man/man1; fi
+	install -m 0644 $(BIN).1 $(DESTDIR)/share/man/man1/
 
 clean:
 	rm *.o
-	rm trilobite
+	rm $(BIN)
