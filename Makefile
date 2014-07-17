@@ -1,7 +1,7 @@
 CC=g++
 FLAGS=-Wall -c
 LIBS=-lncurses
-DESTDIR=/usr/local
+DESTDIR=/usr
 BIN=trilobite
 OBJ=trilobite.o diskItem.o file.o directory.o
 
@@ -34,5 +34,4 @@ install:
 	install -m 0644 $(BIN).1 $(DESTDIR)/share/man/man1/
 
 clean:
-	rm *.o
-	rm $(BIN)
+	rm -f $(OBJ) $(BIN)
