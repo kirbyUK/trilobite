@@ -1,7 +1,7 @@
 CC=g++
 FLAGS=-Wall -c
 LIBS=-lncurses
-DESTDIR=/usr
+DESTDIR=/usr/local
 BIN=trilobite
 OBJ=trilobite.o diskItem.o file.o directory.o
 
