@@ -1,0 +1,13 @@
+Index: trilobite-0.3/Makefile
+===================================================================
+--- trilobite-0.3.orig/Makefile	2014-07-19 20:33:31.910877837 +0100
++++ trilobite-0.3/Makefile	2014-07-19 20:34:04.478876311 +0100
+@@ -2,7 +2,7 @@
+ FLAGS=-Wall -c
+ LIBS=-lncurses
+ DESTDIR=/
+-PREFIX=$(DESTDIR)/usr/local
++PREFIX=$(DESTDIR)/usr
+ BIN=trilobite
+ OBJ=trilobite.o diskItem.o file.o directory.o
+ 

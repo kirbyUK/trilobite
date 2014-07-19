@@ -1,0 +1,18 @@
+Source: trilobite
+Section: utils
+Priority: optional
+Maintainer: Alex Kerr <kirbyman62@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), quilt ( >= 0.46)
+Standards-Version: 3.9.5
+Homepage: https://github.com/kirbyman62/trilobite
+#Vcs-Git: git://git.debian.org/collab-maint/trilobite.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/trilobite.git;a=summary
+
+Package: trilobite
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Simple, lightweight ncurses filemanger
+ trilobite is a simple, lightweight ncurses filemanager with
+ a focus on a fast experience and minimal dependencies. It has
+ very basic functionality to move, copy, paste, rename and delete
+ files and directories.
