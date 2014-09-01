@@ -83,22 +83,25 @@ std::string DiskItem::getFormattedSize()
 //Sorts DiskItems by name, giving priority to dotfiles:
 bool byName(DiskItem* A, DiskItem* B)
 {
+	std::string a = A->getName();
+	std::string b = B->getName();
+
 	//Check if either file is a dotfile:
-	if((A->getName()[0] == '.') && (B->getName()[0] == '.'))
+	if((a[0] == '.') && (b[0] == '.'))
 	{
 		//If they both are, sort by name:
-		if(lowercase(A->getName()) < lowercase(B->getName()))
+		if(lowercase(a) < lowercase(a))
 			return true;
 		else
 			return false;
 	}
 	//If only one is a dotfile, it gets priority:
-	else if(A->getName()[0] == '.')
+	else if(a[0] == '.')
 		return true;
-	else if(B->getName()[0] == '.')
+	else if(b[0] == '.')
 		return false;
 	//Otherwise, neither is a dotfile, so sort by name:
-	else if(lowercase(A->getName()) < lowercase(B->getName()))
+	else if(lowercase(a) < lowercase(b))
 		return true;
 	else
 		return false;
@@ -110,6 +113,6 @@ std::string lowercase(std::string s)
 	//and appending it to the output string, which is returned:
 	std::string out = "";
 	for(unsigned int i = 0; i < s.size(); i++)
-		out += tolower(s[0]);
+		out += tolower(s[i]);
 	return out;
 }
